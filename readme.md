@@ -1,43 +1,49 @@
 # M1s_BL808_example
 
-[详细说明文档](https://wiki.sipeed.com/hardware/zh/maix/m1s/other/start.html)
-[Detailed document](https://wiki.sipeed.com/hardware/en/maix/m1s/other/start.html)
+[Detailed document](https://wiki.sipeed.com/hardware/en/maix/m1s/other/start.html#SDK-Compile)
 
 ## Setup
 
 1. Download sdk
 
     ```shell
-    mkdir ~/bl808 && cd ~/bl808
-    git clone https://github.com/sipeed/M1s_BL808_SDK.git
+    mkdir m1s & cd m1s
+    git clone git@github.com:kamejoko80/M1s_BL808_SDK.git
+    cd M1s_BL808_SDK
+    git checkout henry_dev
     ```
-    
+
 2. Download example
 
     ```shell
-    cd ~/bl808
-    git clone https://github.com/sipeed/M1s_BL808_example.git
-    cd M1s_BL808_example && ln -s ../M1s_BL808_SDK ./
+    cd m1s
+    git clone git@github.com:kamejoko80/M1s_BL808_example.git
+    cd M1s_BL808_example
+    git checkout henry_dev
     ```
 
-3. Download toolchain (version 2.2.4) [here](https://dl.sipeed.com/shareURL/others/toolchain) or [here](https://occ.t-head.cn/community/download?id=3996672928124047360). Extract it to `M1s_BL808_SDK/toolchain/` and rename to  `Linux_x86_64` 
+3. Download toolchain (version 2.2.4) [here](https://dl.sipeed.com/shareURL/others/toolchain) or [here](https://occ.t-head.cn/community/download?id=3996672928124047360). Extract it to `M1s_BL808_SDK/toolchain/` and rename to  `Linux_x86_64`
 
     ```shell
-    cd ~/bl808 && mkdir M1s_BL808_SDK/toolchain
-    
-    mv {your_download_path}/Xuantie-900-gcc-elf-newlib-x86_64-V2.2.4-20220715.tar.gz ~/bl808
-    tar -zxvf Xuantie-900-gcc-elf-newlib-x86_64-V2.2.4-20220715.tar.gz -C M1s_BL808_SDK/toolchain/
-    
-    cd M1s_BL808_SDK/toolchain && mv Xuantie-900-gcc-elf-newlib-x86_64-V2.2.4/ Linux_x86_64 && cd -
+    cd m1s
+    mkdir -p M1s_BL808_SDK/toolchain
+    cd M1s_BL808_SDK/toolchain
+    git clone git@github.com:kamejoko80/m1s_toolchain.git
+    mv m1s_toolchain Linux_x86_64
     ```
 
-4. Build the hello_world example
+4. Export SDK path environment variables
+
 
     ```shell
-    cd ~/bl808/M1s_BL808_example/c906_app/
+    cd M1s_BL808_SDK
+    export BL_SDK_PATH=$PWD
+    ```
 
-    # Configure environment variables (Executed only once per working environment)
-    export BL_SDK_PATH=$(pwd)/../M1s_BL808_SDK
+5. Build the hello_world example
+
+    ```shell
+    cd M1s_BL808_example/c906_app/
 
     # Compile the hello_world project
     ./build.sh hello_world
@@ -54,7 +60,7 @@
     ```shell
     # unzip
     unzip BouffaloLabDevCube-v1.8.0.zip
-    
+
     # startup
     ./BLDevCube-v1.8.0/BLDevCube-ubuntu &> /dev/null &
     ```
@@ -70,9 +76,9 @@
     - Configure the tool according to the label below, finally click `Create & Download` will start to download firmware
 
         ![image-20221018233328391](assets/image-20221018233328391.png)
-        
+
         **Tips:**
-        
+
         > If you have downloaded the e907 firmware and have an extra USB port on your PC, you can update the c906 firmware via USB. You just need connect the USB to the OTG port, press and hold the left and right buttons before the board is reset, then drag your firmware to the ejected disk and just wait for the new firmware to boot.
 
 3. Download bl702 firmware
