@@ -1,0 +1,1 @@
+firmware_20230227.bin: Fix network transfer parameter errors
