@@ -8,7 +8,7 @@
 
     ```shell
     mkdir m1s & cd m1s
-    git clone git@github.com:kamejoko80/M1s_BL808_SDK.git
+    git clone --recurse-submodules git@github.com:kamejoko80/M1s_BL808_SDK.git
     cd M1s_BL808_SDK
     git checkout henry_dev
     ```
