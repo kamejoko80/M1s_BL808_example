@@ -11,6 +11,7 @@
     git clone --recurse-submodules git@github.com:kamejoko80/M1s_BL808_SDK.git
     cd M1s_BL808_SDK
     git checkout henry_dev
+    git submodule update --remote
     ```
 
 2. Download example
