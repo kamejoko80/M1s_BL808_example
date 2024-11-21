@@ -12,6 +12,7 @@
     cd M1s_BL808_SDK
     git checkout henry_dev
     git submodule update --remote
+    git submodule update
     ```
 
 2. Download example

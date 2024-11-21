@@ -15,6 +15,13 @@ int duktape_execute_file(duk_context *ctx, const char *filename) {
     size_t file_size = 0;
     int retval = -1;
 
+    /*
+     * Workaround:
+     * Error happends when user edits the javascript and save file
+     */
+    fatfs_unregister();
+    fatfs_register();
+
     // Open the JavaScript file
     if ((fd = aos_open(filename, O_RDWR)) < 0) {
         printf("%s not found!\r\n", filename);
