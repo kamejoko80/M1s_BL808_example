@@ -12,6 +12,7 @@
 /* Duktape */
 #include "duktape.h"
 
+extern duk_context *ctx;
 extern int duktape_execute_file(duk_context *ctx, const char *filename);
 
 static duk_ret_t native_print(duk_context *ctx) {
@@ -22,25 +23,12 @@ static duk_ret_t native_print(duk_context *ctx) {
     return 0;
 }
 
-/* Custom fatal error handler */
-void my_fatal_handler(void *udata, const char *msg) {
-    (void) udata;  /* Ignore user data */
-    if (msg) {
-        printf("Fatal error: %s\r\n", msg);
-    } else {
-        printf("Fatal error: (no message)\r\n");
-    }
-    while(1);
-}
-
 void cmd_duk_execute(char *buf, int len, int argc, char **argv) {
 
     const char *filename;
     getopt_env_t getopt_env;
     utils_getopt_init(&getopt_env, 0);
 
-    //duk_context *ctx = duk_create_heap_default();
-    duk_context *ctx = duk_create_heap(NULL, NULL, NULL, NULL, my_fatal_handler);
     if (!ctx) {
         printf("Failed to create a Duktape heap.\r\n");
         return;
@@ -58,5 +46,4 @@ void cmd_duk_execute(char *buf, int len, int argc, char **argv) {
             printf("Error executing script: %s\r\n", filename);
         }
     }
-    duk_destroy_heap(ctx);
 }

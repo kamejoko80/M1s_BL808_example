@@ -18,7 +18,7 @@
 #include "duktape.h"
 
 /* Global */
-duk_context *ctx;
+duk_context *ctx = NULL;
 
 /* Extern */
 extern void cmd_duk_execute(char *buf, int len, int argc, char **argv);
@@ -30,4 +30,6 @@ const static struct cli_command cmds_user[] STATIC_CLI_CMD_ATTRIBUTE = {
 void main()
 {
     fatfs_register();
+    ctx = duk_create_heap_default();
+    //duk_destroy_heap(ctx);
 }
