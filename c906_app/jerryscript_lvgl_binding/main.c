@@ -40,6 +40,7 @@ static void lvgl_task(void *param)
 
 void jerryscript_lvgl_demo(void)
 {
+#if 0
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -50,6 +51,15 @@ void jerryscript_lvgl_demo(void)
         "lv_obj_set_size(button, 100, 50);\n"
         "lv_obj_align(button, 2, 0, 20);\n"
         "print('Label created and displayed.');";
+#else
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "const myLabel = new Label(screen);\n"
+        "myLabel.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "myLabel.setText('Hello, LVGL!');\n"
+        "print('Label created and displayed.');";
+#endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
 
@@ -58,7 +68,7 @@ void jerryscript_lvgl_demo(void)
 
     /* Register the adder function in the global object */
     jr_lv_label_init();
-    jr_lv_btn_init();
+    //jr_lv_btn_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
@@ -79,7 +89,7 @@ void jerryscript_lvgl_demo(void)
     jerry_value_free(parsed_code);
 
     /* Cleanup engine */
-    jerry_cleanup ();
+    jerry_cleanup();
 }
 
 void main()
@@ -87,6 +97,8 @@ void main()
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
+
+    printf("Execute jerryscript demo\r\n");
 
     jerryscript_lvgl_demo();
 

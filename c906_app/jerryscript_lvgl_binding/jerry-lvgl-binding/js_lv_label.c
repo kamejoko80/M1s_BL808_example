@@ -27,6 +27,9 @@
 
 #include <stdio.h>
 #include "jr_lvgl.h"
+#include "js_lv_label.h"
+#include "jerryscript-ext/handlers.h"
+#include "jerryscript-ext/properties.h"
 
 static jerry_value_t js_lv_scr_act(const jerry_call_info_t *call_info_p,
                                    const jerry_value_t args[],
@@ -108,6 +111,7 @@ static jerry_value_t js_lv_label_create(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_label_set_text(const jerry_call_info_t *call_info_p,
                                           const jerry_value_t args[],
                                           const jerry_length_t args_count) {
+    printf("js_lv_label_set_text\n");
     if (args_count != 2 || !jerry_value_is_object(args[0]) || !jerry_value_is_string(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments");
     }
@@ -373,6 +377,7 @@ static jerry_value_t js_lv_label_cut_text(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
+#if 0
 static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
     JERRY_CFUNC_ENTRY("lv_scr_act",                        js_lv_scr_act),
     JERRY_CFUNC_ENTRY("lv_obj_align",                      js_lv_obj_align),
@@ -394,7 +399,153 @@ static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
     JERRY_CFUNC_ENTRY("lv_label_ins_text",                 js_lv_label_ins_text),
     JERRY_CFUNC_ENTRY("lv_label_cut_text",                 js_lv_label_cut_text),
 };
+#else
+static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
+    JERRY_CFUNC_ENTRY("lv_scr_act",                        js_lv_scr_act),
+    JERRY_CFUNC_ENTRY("lv_obj_align",                      js_lv_obj_align),
+};
+#endif
+
+/*************************************************************************
+Implemented following JS class mechanism
+*************************************************************************/
+
+static void js_lv_label_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
+    printf("js_lv_label_destructor_cb\n");
+    /*
+     * Temporally dissable because JS gabage collector
+     * automaticlly destroys the JS obj
+     */
+    //lv_obj_t *label = (lv_obj_t *) native_p;
+    //jr_lvgl_obj_desctruct(label);
+}
+
+static jerry_object_native_info_t jerry_obj_native_info = {
+    .free_cb = js_lv_label_destructor_cb,
+};
+
+static jerry_value_t js_lv_label_constructor(const jerry_call_info_t *call_info_p,
+                                             const jerry_value_t args[],
+                                             const jerry_length_t args_count) {
+    printf("js_lv_label_constructor\n");
+    if (args_count < 1 || !jerry_value_is_object(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected object .");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, parent, args[0], NULL);
+    lv_obj_t *label = lv_label_create(parent);
+    if (label == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create label");
+    }
+
+    //lv_obj_align(label, 2, 0, 0);
+    lv_obj_set_user_data(label, (void *)call_info_p->this_value);
+    jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
+                                &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
+                                label                    /* void *native_pointer_p */
+                                );
+    return jerry_undefined();
+}
+
+static jerry_value_t js_label_set_text(const jerry_call_info_t *call_info_p,
+                                       const jerry_value_t args[],
+                                       const jerry_length_t args_count) {
+    printf("js_lv_label_set_text\n");
+    if (args_count < 1 || !jerry_value_is_string(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected (text)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    jerry_size_t size = jerry_string_size(args[0], JERRY_ENCODING_UTF8);
+    char *text = malloc(size + 1);
+    if (text == NULL)
+    {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Could not allocate text");
+    }
+    jerry_string_to_buffer(args[0], JERRY_ENCODING_UTF8, (jerry_char_t *)text, size);
+    text[size] = '\0';
+
+    lv_label_set_text(label, text);
+    free(text);
+
+    return jerry_undefined();
+}
+
+static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
+                                  const jerry_value_t args[],
+                                  const jerry_length_t args_count) {
+    // Ensure at least 4 arguments: `align`, `x_ofs`, `y_ofs`, and `this`
+    if (args_count < 3) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t align = (uint32_t)jerry_value_as_number(args[0]);
+    lv_coord_t x_ofs = (lv_coord_t)jerry_value_as_number(args[1]);
+    lv_coord_t y_ofs = (lv_coord_t)jerry_value_as_number(args[2]);
+
+    // Call LVGL function
+    lv_obj_align(label, align, x_ofs, y_ofs);
+
+    return jerry_undefined();
+}
+
+void js_register_align_constants(jerry_value_t global_obj) {
+    jerry_value_t align_center = jerry_number(LV_ALIGN_CENTER);
+    jerry_value_t align_name = jerry_string_sz("LV_ALIGN_CENTER");
+    jerry_object_set(global_obj, align_name, align_center);
+    jerry_value_free(align_center);
+    jerry_value_free(align_name);
+    // Repeat for other alignment constants
+}
 
 void jr_lv_label_init(void) {
+
+    printf("jr_lv_label_init\r\n");
+
+    /* Refer to: 10.EXT-REFERENCE-HANDLER.md  */
+    const jerryx_property_entry methods[] =
+    {
+        JERRYX_PROPERTY_FUNCTION ("setText", js_label_set_text),
+        JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
+        JERRYX_PROPERTY_LIST_END(),
+    };
+
+    /* Create the Label constructor */
+    jerry_value_t label_constructor = jerry_function_external(js_lv_label_constructor);
+
+    /* Create the prototype object */
+    jerry_value_t prop_obj = jerry_object();
+
+    /* Register all properties, methodes */
+    jr_set_prop_list(prop_obj, methods);
+
+    /* Link the prototype to the constructor */
+    jerry_value_t prototype_property = jerry_string_sz("prototype");
+    jerry_object_set(label_constructor, prototype_property, prop_obj);
+    jerry_value_free(prototype_property);
+    jerry_value_free(prop_obj);
+
+    /* Register the Label constructor in the global object */
+    jerry_value_t global_obj = jerry_current_realm();
+
+    /* Register global constants */
+    js_register_align_constants(global_obj);
+
+    /* Register instance/constructor */
+    jerry_value_t constructor_name = jerry_string_sz("Label");
+    jerry_object_set(global_obj, constructor_name, label_constructor);
+    jerry_value_free(constructor_name);
+    jerry_value_free(label_constructor);
+    jerry_value_free(global_obj);
+
     jr_register_cfunc_list(jerry_cfunc_entry_list, sizeof(jerry_cfunc_entry_list)/sizeof(jerry_cfunc_entry_t));
 }
