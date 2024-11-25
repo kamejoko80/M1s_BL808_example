@@ -498,15 +498,6 @@ static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-void js_register_align_constants(jerry_value_t global_obj) {
-    jerry_value_t align_center = jerry_number(LV_ALIGN_CENTER);
-    jerry_value_t align_name = jerry_string_sz("LV_ALIGN_CENTER");
-    jerry_object_set(global_obj, align_name, align_center);
-    jerry_value_free(align_center);
-    jerry_value_free(align_name);
-    // Repeat for other alignment constants
-}
-
 void jr_lv_label_init(void) {
 
     printf("jr_lv_label_init\r\n");
@@ -536,9 +527,6 @@ void jr_lv_label_init(void) {
 
     /* Register the Label constructor in the global object */
     jerry_value_t global_obj = jerry_current_realm();
-
-    /* Register global constants */
-    js_register_align_constants(global_obj);
 
     /* Register instance/constructor */
     jerry_value_t constructor_name = jerry_string_sz("Label");

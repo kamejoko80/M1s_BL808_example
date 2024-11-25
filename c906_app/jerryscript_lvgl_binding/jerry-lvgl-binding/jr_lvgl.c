@@ -26,7 +26,6 @@ void jr_lvgl_detach_children(lv_obj_t *parent) {
 }
 
 void jr_lvgl_event_clear_user_data(lv_obj_t *obj) {
-    
     if(obj->spec_attr) {
         if(obj->spec_attr->event_dsc) {
             lvgl_event_user_data_t *user_data = (lvgl_event_user_data_t *)obj->spec_attr->event_dsc->user_data;
@@ -72,6 +71,22 @@ void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries, jerry_size_t siz
     }
 
     jerry_value_free(global_object);
+}
+
+void jr_register_global_constant_list(jerry_value_t global_obj, jerry_const_entry_t *entries)
+{
+    for (uint32_t idx = 0; (entries[idx].name != NULL); idx++)
+    {
+        jerry_value_t name = jerry_string_sz(entries[idx].name);
+        jerry_value_t value = jerry_number(entries[idx].value);
+        jerry_value_t set_result = jerry_object_set(global_obj, name, value);
+        if(jerry_value_is_exception(set_result)) {
+            printf("Failed register global %s constant\n", entries[idx].name);
+        }
+        jerry_value_free(set_result);
+        jerry_value_free(value);
+        jerry_value_free(name);        
+    }
 }
 
 /* Refer to: 10.EXT-REFERENCE-HANDLER.md  */
