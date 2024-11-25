@@ -27,6 +27,7 @@
 
 #include "jr_lvgl.h"
 #include "js_gbl_const.h"
+#include "js_gbl_func.h"
 #include "js_lv_label.h"
 #include "js_lv_btn.h"
 
@@ -68,8 +69,9 @@ void jerryscript_lvgl_demo(void)
     jerry_init(JERRY_INIT_EMPTY);
 
     /* Register the adder function in the global object */
-    jr_lv_label_init();
     jr_gbl_const_init();
+    jr_gbl_func_init();    
+    jr_lv_label_init();
     //jr_lv_btn_init();
 
     /* Register the print function in the global object */

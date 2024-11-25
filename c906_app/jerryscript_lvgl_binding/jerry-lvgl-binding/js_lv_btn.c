@@ -82,8 +82,9 @@ static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
     JERRY_CFUNC_ENTRY("lv_obj_set_size", js_lv_obj_set_size),
     JERRY_CFUNC_ENTRY("lv_obj_align",    js_lv_obj_align),
     JERRY_CFUNC_ENTRY("lv_btn_create",   js_lv_btn_create),
+    JERRY_CFUNC_LIST_END() ,
 };
 
 void jr_lv_btn_init(void) {
-    jr_register_cfunc_list(jerry_cfunc_entry_list, sizeof(jerry_cfunc_entry_list)/sizeof(jerry_cfunc_entry_t));
+    jr_register_cfunc_list(jerry_cfunc_entry_list);
 }

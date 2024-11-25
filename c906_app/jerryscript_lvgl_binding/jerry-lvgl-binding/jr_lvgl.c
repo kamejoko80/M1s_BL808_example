@@ -1,7 +1,7 @@
 /*
  * Reference: https://github.com/lee88688/jerryscript-lvgl-binding
  */
- 
+
 #include <stdio.h>
 #include "jr_lvgl.h"
 #include "jerryscript-ext/handlers.h"
@@ -30,7 +30,7 @@ void jr_lvgl_event_clear_user_data(lv_obj_t *obj) {
         if(obj->spec_attr->event_dsc) {
             lvgl_event_user_data_t *user_data = (lvgl_event_user_data_t *)obj->spec_attr->event_dsc->user_data;
             if(user_data) {
-                printf("free user_data->func\n");    
+                printf("free user_data->func\n");
                 jerry_value_free(user_data->func);
                 printf("free user_data->target\n");
                 jerry_value_free(user_data->target);
@@ -41,28 +41,29 @@ void jr_lvgl_event_clear_user_data(lv_obj_t *obj) {
             lv_mem_free(obj->spec_attr->event_dsc);
             obj->spec_attr->event_dsc = NULL;
         }
-    }    
+    }
 }
 
 void jr_lvgl_obj_desctruct(lv_obj_t *obj) {
-    if(obj) {        
+    if(obj) {
         jr_lvgl_detach_children(obj);
         jr_lvgl_event_clear_user_data(obj);
         lv_obj_del(obj);
     }
 }
 
-void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries, jerry_size_t size) {
+void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries) {
 
     jerry_value_t global_object = jerry_current_realm();
 
-    for(jerry_size_t i = 0; i < size; i++) {
-        jerry_value_t property_name  = jerry_string_sz(entries[i].cfunc_name);
-        jerry_value_t property_value = jerry_function_external(entries[i].cfunc_handler);
+    for (uint32_t idx = 0; (entries[idx].cfunc_name != NULL); idx++)
+    {
+        jerry_value_t property_name  = jerry_string_sz(entries[idx].cfunc_name);
+        jerry_value_t property_value = jerry_function_external(entries[idx].cfunc_handler);
         jerry_value_t set_result     = jerry_object_set(global_object, property_name, property_value);
 
         if(jerry_value_is_exception(set_result)) {
-            printf("Failed register %s function\n", entries[i].cfunc_name);
+            printf("Failed register %s function\n", entries[idx].cfunc_name);
         }
 
         jerry_value_free(set_result);
@@ -85,7 +86,7 @@ void jr_register_global_constant_list(jerry_value_t global_obj, jerry_const_entr
         }
         jerry_value_free(set_result);
         jerry_value_free(value);
-        jerry_value_free(name);        
+        jerry_value_free(name);
     }
 }
 

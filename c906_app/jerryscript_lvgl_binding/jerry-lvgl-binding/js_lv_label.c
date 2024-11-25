@@ -31,16 +31,6 @@
 #include "jerryscript-ext/handlers.h"
 #include "jerryscript-ext/properties.h"
 
-static jerry_value_t js_lv_scr_act(const jerry_call_info_t *call_info_p,
-                                   const jerry_value_t args[],
-                                   const jerry_length_t args_count) {
-    lv_obj_t *screen = lv_scr_act();
-    jerry_value_t js_screen = jerry_object();
-    jerry_object_set_native_ptr(js_screen, NULL, screen);
-
-    return js_screen;
-}
-
 static jerry_value_t js_lv_obj_align(const jerry_call_info_t *call_info_p,
                                      const jerry_value_t args[],
                                      const jerry_length_t args_count) {
@@ -398,11 +388,7 @@ static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
     JERRY_CFUNC_ENTRY("lv_label_get_text_selection_end",   js_lv_label_get_text_selection_end),
     JERRY_CFUNC_ENTRY("lv_label_ins_text",                 js_lv_label_ins_text),
     JERRY_CFUNC_ENTRY("lv_label_cut_text",                 js_lv_label_cut_text),
-};
-#else
-static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
-    JERRY_CFUNC_ENTRY("lv_scr_act",                        js_lv_scr_act),
-    JERRY_CFUNC_ENTRY("lv_obj_align",                      js_lv_obj_align),
+    JERRY_CFUNC_LIST_END() ,
 };
 #endif
 
@@ -534,6 +520,4 @@ void jr_lv_label_init(void) {
     jerry_value_free(constructor_name);
     jerry_value_free(label_constructor);
     jerry_value_free(global_obj);
-
-    jr_register_cfunc_list(jerry_cfunc_entry_list, sizeof(jerry_cfunc_entry_list)/sizeof(jerry_cfunc_entry_t));
 }
