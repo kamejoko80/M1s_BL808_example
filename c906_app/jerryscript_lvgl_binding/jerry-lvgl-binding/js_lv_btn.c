@@ -38,6 +38,24 @@
 * Native event handler for LVGL
 *************************************************************************/
 
+void js_lv_btn_event_cb(lv_event_t *event) {
+    
+    printf("js_lv_btn_event_cb\n");        
+    lv_obj_t *btn = lv_event_get_target(event);
+    // Retrieve the JavaScript callback from the user data
+    jerry_value_t callback = (jerry_value_t)(uintptr_t)lv_obj_get_user_data(btn);
+    if (jerry_value_is_function(callback)) {
+        jerry_value_t global_object = jerry_current_realm();
+        jerry_value_t ret_value = jerry_call(callback, global_object, NULL, 0);
+        jerry_value_free(global_object);
+
+        if (jerry_value_is_error(ret_value)) {
+            printf("Error in JS callback\n");
+        }
+
+        jerry_value_free(ret_value);
+    }
+}
 
 /************************************************************************
 * Constructor & Desctructor
@@ -124,6 +142,28 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
+static jerry_value_t js_lv_btn_on_press(const jerry_call_info_t *call_info_p,
+                                        const jerry_value_t args[],
+                                        const jerry_length_t args_count) {
+    if (args_count < 1 || !jerry_value_is_function(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected a callback function.");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
+    if(btn == NULL) {
+       return jerry_undefined();
+    }
+
+    // Store the JavaScript callback in the user data
+    jerry_value_t callback = jerry_value_copy(args[0]); // Retain the JS function
+    lv_obj_set_user_data(btn, (void *)callback);
+
+    // Set the LVGL button event callback
+    lv_obj_add_event_cb(btn, js_lv_btn_event_cb, LV_EVENT_CLICKED, btn);
+
+    return jerry_undefined();
+}
+
 /************************************************************************
 * Class register functions
 *************************************************************************/
@@ -134,6 +174,7 @@ static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handle
     {
         JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
         JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
+        JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_btn_on_press),
         JERRYX_PROPERTY_LIST_END(),
     };
 

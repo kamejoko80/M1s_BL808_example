@@ -65,6 +65,9 @@ void jerryscript_lvgl_demo(void)
         "const myButton = new Button(screen);\n"
         "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
         "myButton.setSize(100, 50);\n"
+        "btn.onPress(function () {\n"
+        "print('Button onPress event');\n"
+        "});\n"
         "print('Button created and displayed.');";        
 #endif
 
