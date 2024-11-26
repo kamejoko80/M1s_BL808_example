@@ -496,16 +496,239 @@ static jerry_value_t js_label_set_text(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-void jr_lv_label_class_register(jerry_external_handler_t constuctor_handler) {
+static jerry_value_t js_lv_label_set_long_mode(const jerry_call_info_t *call_info_p,
+                                               const jerry_value_t args[],
+                                               const jerry_length_t args_count) {
+    if (args_count != 1 || !jerry_value_is_number(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected long_mode (number).");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    lv_label_long_mode_t long_mode = (lv_label_long_mode_t)jerry_value_as_number(args[0]);
+    lv_label_set_long_mode(label, long_mode);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_label_set_recolor(const jerry_call_info_t *call_info_p,
+                                             const jerry_value_t args[],
+                                             const jerry_length_t args_count) {
+    if (args_count != 1 || !jerry_value_is_boolean(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected boolean (en).");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    bool enable = jerry_value_is_true(args[0]);
+    lv_label_set_recolor(label, enable);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_label_set_text_sel_start(const jerry_call_info_t *call_info_p,
+                                                    const jerry_value_t args[],
+                                                    const jerry_length_t args_count) {
+    if (args_count != 1 || !jerry_value_is_number(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected object and number.");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t index = (uint32_t)jerry_value_as_number(args[0]);
+    lv_label_set_text_sel_start(label, index);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_label_get_text(const jerry_call_info_t *call_info_p,
+                                          const jerry_value_t args[],
+                                          const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    const char *text = lv_label_get_text(label);
+    return jerry_string_sz(text);
+}
+
+static jerry_value_t js_lv_label_get_long_mode(const jerry_call_info_t *call_info_p,
+                                               const jerry_value_t args[],
+                                               const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    lv_label_long_mode_t long_mode = lv_label_get_long_mode(label);
+    return jerry_number(long_mode);
+}
+
+static jerry_value_t js_lv_label_get_recolor(const jerry_call_info_t *call_info_p,
+                                             const jerry_value_t args[],
+                                             const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    bool recolor = lv_label_get_recolor(label);
+    return jerry_boolean(recolor);
+}
+
+static jerry_value_t js_lv_label_get_letter_pos(const jerry_call_info_t *call_info_p,
+                                                const jerry_value_t args[],
+                                                const jerry_length_t args_count) {
+    if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_object(args[1])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected number, and point object.");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t char_id = (uint32_t)jerry_value_as_number(args[0]);
+    JERRY_GET_NATIVE_PTR(lv_point_t, pos, args[1], NULL);
+    lv_label_get_letter_pos(label, char_id, pos);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_label_get_letter_on(const jerry_call_info_t *call_info_p,
+                                               const jerry_value_t args[],
+                                               const jerry_length_t args_count) {
+    if (args_count < 1 || !jerry_value_is_object(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected point object.");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_point_t, pos_in, args[0], NULL);
+    uint32_t char_id = lv_label_get_letter_on(label, pos_in);
+    return jerry_number(char_id);
+}
+
+static jerry_value_t js_lv_label_is_char_under_pos(const jerry_call_info_t *call_info_p,
+                                                   const jerry_value_t args[],
+                                                   const jerry_length_t args_count) {
+    if (args_count < 1 || !jerry_value_is_object(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected point object.");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_point_t, pos, args[0], NULL);
+    bool is_under = lv_label_is_char_under_pos(label, pos);
+    return jerry_boolean(is_under);
+}
+
+static jerry_value_t js_lv_label_get_text_selection_start(const jerry_call_info_t *call_info_p,
+                                                          const jerry_value_t args[],
+                                                          const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t start_pos = lv_label_get_text_selection_start(label);
+    return jerry_number(start_pos);
+}
+
+static jerry_value_t js_lv_label_get_text_selection_end(const jerry_call_info_t *call_info_p,
+                                                        const jerry_value_t args[],
+                                                        const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t end_pos = lv_label_get_text_selection_end(label);
+    return jerry_number(end_pos);
+}
+
+static jerry_value_t js_lv_label_ins_text(const jerry_call_info_t *call_info_p,
+                                          const jerry_value_t args[],
+                                          const jerry_length_t args_count) {
+    if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_string(args[1])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected number, and string.");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t pos = (uint32_t)jerry_value_as_number(args[0]);
+    jerry_size_t text_size = jerry_string_size(args[1], JERRY_ENCODING_UTF8);
+    char *text = malloc(text_size + 1);
+    if (!text) {
+        return jerry_throw_sz(JERRY_ERROR_RANGE, "Memory allocation failed");
+    }
+    jerry_string_to_buffer(args[1], JERRY_ENCODING_UTF8, (jerry_char_t *)text, text_size);
+    text[text_size] = '\0';
+    lv_label_ins_text(label, pos, text);
+    free(text);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_label_cut_text(const jerry_call_info_t *call_info_p,
+                                          const jerry_value_t args[],
+                                          const jerry_length_t args_count) {
+    if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected two numbers.");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t pos = (uint32_t)jerry_value_as_number(args[0]);
+    uint32_t count = (uint32_t)jerry_value_as_number(args[1]);
+    lv_label_cut_text(label, pos, count);
+    return jerry_undefined();
+}
+
+/************************************************************************
+* Class register functions
+*************************************************************************/
+
+void jr_lv_label_class_register(jerry_external_handler_t constructor_handler) {
 
     jerryx_property_entry methods[] =
     {
-        JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
-        JERRYX_PROPERTY_FUNCTION ("setText", js_label_set_text),
+        JERRYX_PROPERTY_FUNCTION ("align",                 js_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("setText",               js_label_set_text),
+        JERRYX_PROPERTY_FUNCTION ("setLongMode",           js_lv_label_set_long_mode),
+        JERRYX_PROPERTY_FUNCTION ("setRecolor",            js_lv_label_set_recolor),
+        JERRYX_PROPERTY_FUNCTION ("setSelStart",           js_lv_label_set_text_sel_start),
+        JERRYX_PROPERTY_FUNCTION ("getText",               js_lv_label_get_text),
+        JERRYX_PROPERTY_FUNCTION ("getLongMode",           js_lv_label_get_long_mode),
+        JERRYX_PROPERTY_FUNCTION ("getRecolor",            js_lv_label_get_recolor),
+        JERRYX_PROPERTY_FUNCTION ("getLetterPos",          js_lv_label_get_letter_pos),
+        JERRYX_PROPERTY_FUNCTION ("getLetterOn",           js_lv_label_get_letter_on),
+        JERRYX_PROPERTY_FUNCTION ("isCharUnderPos",        js_lv_label_is_char_under_pos),
+        JERRYX_PROPERTY_FUNCTION ("getTextSelectionStart", js_lv_label_get_text_selection_start),
+        JERRYX_PROPERTY_FUNCTION ("getTextSelectionEnd",   js_lv_label_get_text_selection_end),
+        JERRYX_PROPERTY_FUNCTION ("insText",               js_lv_label_ins_text),
+        JERRYX_PROPERTY_FUNCTION ("cutText",               js_lv_label_cut_text),        
         JERRYX_PROPERTY_LIST_END(),
     };
 
-    jerry_value_t constructor = jerry_function_external(constuctor_handler);
+    jerry_value_t constructor = jerry_function_external(constructor_handler);
     jerry_value_t prop_obj = jerry_object();
     jr_set_prop_list(prop_obj, methods);
     jerry_value_t prototype_property = jerry_string_sz("prototype");
