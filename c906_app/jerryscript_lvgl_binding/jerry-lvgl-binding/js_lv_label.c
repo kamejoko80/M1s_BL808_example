@@ -448,7 +448,7 @@ static jerry_value_t js_lv_label_constructor(const jerry_call_info_t *call_info_
 static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
                                   const jerry_value_t args[],
                                   const jerry_length_t args_count) {
-    // Ensure at least 4 arguments: `align`, `x_ofs`, `y_ofs`, and `this`
+    // Ensure at least 3 arguments: `align`, `x_ofs`, `y_ofs`
     if (args_count < 3) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
     }
@@ -706,7 +706,7 @@ static jerry_value_t js_lv_label_cut_text(const jerry_call_info_t *call_info_p,
 * Class register functions
 *************************************************************************/
 
-void jr_lv_label_class_register(jerry_external_handler_t constructor_handler) {
+static void jr_lv_label_class_register(jerry_external_handler_t constructor_handler) {
 
     jerryx_property_entry methods[] =
     {
@@ -745,6 +745,5 @@ void jr_lv_label_class_register(jerry_external_handler_t constructor_handler) {
 }
 
 void jr_lv_label_init(void) {
-    printf("jr_lv_label_init\r\n");
     jr_lv_label_class_register(js_lv_label_constructor);
 }

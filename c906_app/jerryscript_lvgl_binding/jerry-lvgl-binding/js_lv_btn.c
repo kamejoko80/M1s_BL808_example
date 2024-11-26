@@ -27,64 +27,132 @@
 
 #include <stdio.h>
 #include "jr_lvgl.h"
+#include "js_lv_btn.h"
+#include "jerryscript-ext/handlers.h"
+#include "jerryscript-ext/properties.h"
 
-static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
-                                        const jerry_value_t args[],
-                                        const jerry_length_t args_cnt) {
-    if (args_cnt < 3 || !jerry_value_is_object(args[0]) ||
-        !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected (obj, width, height)");
-    }
+#define LV_LABEL_OBJ_NAME "Button"
+#define FORMAT_TEXT_SIZE  256
 
-    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, args[0], NULL);
-    lv_coord_t width = (lv_coord_t)jerry_value_as_number(args[1]);
-    lv_coord_t height = (lv_coord_t)jerry_value_as_number(args[2]);
-    lv_obj_set_size(obj, width, height);
-    return jerry_undefined();
+/************************************************************************
+* Native event handler for LVGL
+*************************************************************************/
+
+
+/************************************************************************
+* Constructor & Desctructor
+*************************************************************************/
+
+static void js_lv_btn_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
+    printf("js_lv_btn_destructor_cb\n");
+    /*
+     * Temporally dissable because JS gabage collector
+     * automaticlly destroys the JS obj
+     */
+    //lv_obj_t *btn = (lv_obj_t *) native_p;
+    //jr_lvgl_obj_desctruct(btn);
 }
 
-static jerry_value_t js_lv_obj_align(const jerry_call_info_t *call_info_p,
-                                     const jerry_value_t args[],
-                                     const jerry_length_t args_cnt) {
-    if (args_cnt < 4 || !jerry_value_is_object(args[0]) ||
-        !jerry_value_is_number(args[1]) ||
-        !jerry_value_is_number(args[2]) ||
-        !jerry_value_is_number(args[3])) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected (obj, align, x_ofs, y_ofs)");
-    }
+static jerry_object_native_info_t jerry_obj_native_info = {
+    .free_cb = js_lv_btn_destructor_cb,
+};
 
-    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, args[0], NULL);
-    lv_align_t align = (lv_align_t)jerry_value_as_number(args[1]);
-    lv_coord_t x_ofs = (lv_coord_t)jerry_value_as_number(args[2]);
-    lv_coord_t y_ofs = (lv_coord_t)jerry_value_as_number(args[3]);
-    lv_obj_align(obj, align, x_ofs, y_ofs);
-    return jerry_undefined();
-}
-
-static jerry_value_t js_lv_btn_create(const jerry_call_info_t *call_info_p,
-                                      const jerry_value_t args[],
-                                      const jerry_length_t args_cnt) {
-    if (args_cnt < 1 || !jerry_value_is_object(args[0])) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Parent object is required.");
+static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
+                                           const jerry_value_t args[],
+                                           const jerry_length_t args_count) {
+    printf("js_lv_btn_constructor\n");
+    if (args_count < 1 || !jerry_value_is_object(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected object .");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, parent, args[0], NULL);
     lv_obj_t *btn = lv_btn_create(parent);
     if (btn == NULL) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button.");
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
-    jerry_value_t js_btn = jerry_object();
-    jerry_object_set_native_ptr(js_btn, NULL, btn);
-    return js_btn;
+
+    lv_obj_set_user_data(btn, (void *)(uintptr_t)call_info_p->this_value);
+    jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
+                                &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
+                                btn                      /* void *native_pointer_p */
+                                );
+    return jerry_undefined();
 }
 
-static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
-    JERRY_CFUNC_ENTRY("lv_obj_set_size", js_lv_obj_set_size),
-    JERRY_CFUNC_ENTRY("lv_obj_align",    js_lv_obj_align),
-    JERRY_CFUNC_ENTRY("lv_btn_create",   js_lv_btn_create),
-    JERRY_CFUNC_LIST_END() ,
-};
+/************************************************************************
+* Protperties, methodes definition
+*************************************************************************/
+
+static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
+                                  const jerry_value_t args[],
+                                  const jerry_length_t args_count) {
+    // Ensure at least 3 arguments: `align`, `x_ofs`, `y_ofs`
+    if (args_count < 3) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
+    if(btn == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t align = (uint32_t)jerry_value_as_number(args[0]);
+    lv_coord_t x_ofs = (lv_coord_t)jerry_value_as_number(args[1]);
+    lv_coord_t y_ofs = (lv_coord_t)jerry_value_as_number(args[2]);
+
+    // Call LVGL function
+    lv_obj_align(btn, align, x_ofs, y_ofs);
+
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
+                                        const jerry_value_t args[],
+                                        const jerry_length_t args_cnt) {
+    if (args_cnt < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected (width, height)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
+    if(btn == NULL) {
+       return jerry_undefined();
+    }
+
+    lv_coord_t width = (lv_coord_t)jerry_value_as_number(args[0]);
+    lv_coord_t height = (lv_coord_t)jerry_value_as_number(args[1]);
+    lv_obj_set_size(btn, width, height);
+    return jerry_undefined();
+}
+
+/************************************************************************
+* Class register functions
+*************************************************************************/
+
+static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handler) {
+
+    jerryx_property_entry methods[] =
+    {
+        JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
+        JERRYX_PROPERTY_LIST_END(),
+    };
+
+    jerry_value_t constructor = jerry_function_external(constructor_handler);
+    jerry_value_t prop_obj = jerry_object();
+    jr_set_prop_list(prop_obj, methods);
+    jerry_value_t prototype_property = jerry_string_sz("prototype");
+    jerry_object_set(constructor, prototype_property, prop_obj);
+    jerry_value_free(prototype_property);
+    jerry_value_free(prop_obj);
+
+    jerry_value_t global_obj = jerry_current_realm();
+    jerry_value_t constructor_name = jerry_string_sz(LV_LABEL_OBJ_NAME);
+    jerry_object_set(global_obj, constructor_name, constructor);
+    jerry_value_free(constructor_name);
+    jerry_value_free(constructor);
+    jerry_value_free(global_obj);
+}
 
 void jr_lv_btn_init(void) {
-    jr_register_cfunc_list(jerry_cfunc_entry_list);
+    jr_lv_btn_class_register(js_lv_btn_constructor);
 }

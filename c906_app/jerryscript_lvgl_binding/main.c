@@ -61,7 +61,11 @@ void jerryscript_lvgl_demo(void)
         "myLabel.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myLabel.setText('Hello LVGL!');\n"
         "print(myLabel.getText());\n"
-        "print('Label created and displayed.');";
+        "print('Label created and displayed.');"
+        "const myButton = new Button(screen);\n"
+        "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
+        "myButton.setSize(100, 50);\n"
+        "print('Button created and displayed.');";        
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -73,7 +77,7 @@ void jerryscript_lvgl_demo(void)
     jr_gbl_const_init();
     jr_gbl_func_init();    
     jr_lv_label_init();
-    //jr_lv_btn_init();
+    jr_lv_btn_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
