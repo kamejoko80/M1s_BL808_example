@@ -26,11 +26,16 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "jr_lvgl.h"
 #include "js_lv_label.h"
 #include "jerryscript-ext/handlers.h"
 #include "jerryscript-ext/properties.h"
 
+#define LV_LABEL_OBJ_NAME "Label"
+#define FORMAT_TEXT_SIZE  256
+
+#if 0 /* Jerryscript lvgl native binding functions (one by one) */
 static jerry_value_t js_lv_obj_align(const jerry_call_info_t *call_info_p,
                                      const jerry_value_t args[],
                                      const jerry_length_t args_count) {
@@ -367,7 +372,6 @@ static jerry_value_t js_lv_label_cut_text(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-#if 0
 static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
     JERRY_CFUNC_ENTRY("lv_scr_act",                        js_lv_scr_act),
     JERRY_CFUNC_ENTRY("lv_obj_align",                      js_lv_obj_align),
@@ -393,7 +397,11 @@ static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
 #endif
 
 /*************************************************************************
-Implemented following JS class mechanism
+* Implemented following JS class mechanism
+*************************************************************************/
+
+/************************************************************************
+* Constructor & Desctructor
 *************************************************************************/
 
 static void js_lv_label_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
@@ -425,11 +433,38 @@ static jerry_value_t js_lv_label_constructor(const jerry_call_info_t *call_info_
     }
 
     //lv_obj_align(label, 2, 0, 0);
-    lv_obj_set_user_data(label, (void *)call_info_p->this_value);
+    lv_obj_set_user_data(label, (void *)(uintptr_t)call_info_p->this_value);
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
                                 label                    /* void *native_pointer_p */
                                 );
+    return jerry_undefined();
+}
+
+/************************************************************************
+* Protperties, methodes definition
+*************************************************************************/
+
+static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
+                                  const jerry_value_t args[],
+                                  const jerry_length_t args_count) {
+    // Ensure at least 4 arguments: `align`, `x_ofs`, `y_ofs`, and `this`
+    if (args_count < 3) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
+    if(label == NULL) {
+       return jerry_undefined();
+    }
+
+    uint32_t align = (uint32_t)jerry_value_as_number(args[0]);
+    lv_coord_t x_ofs = (lv_coord_t)jerry_value_as_number(args[1]);
+    lv_coord_t y_ofs = (lv_coord_t)jerry_value_as_number(args[2]);
+
+    // Call LVGL function
+    lv_obj_align(label, align, x_ofs, y_ofs);
+
     return jerry_undefined();
 }
 
@@ -461,63 +496,32 @@ static jerry_value_t js_label_set_text(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
-                                  const jerry_value_t args[],
-                                  const jerry_length_t args_count) {
-    // Ensure at least 4 arguments: `align`, `x_ofs`, `y_ofs`, and `this`
-    if (args_count < 3) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
-    }
+void jr_lv_label_class_register(jerry_external_handler_t constuctor_handler) {
 
-    JERRY_GET_NATIVE_PTR(lv_obj_t, label, call_info_p->this_value, &jerry_obj_native_info);
-    if(label == NULL) {
-       return jerry_undefined();
-    }
-
-    uint32_t align = (uint32_t)jerry_value_as_number(args[0]);
-    lv_coord_t x_ofs = (lv_coord_t)jerry_value_as_number(args[1]);
-    lv_coord_t y_ofs = (lv_coord_t)jerry_value_as_number(args[2]);
-
-    // Call LVGL function
-    lv_obj_align(label, align, x_ofs, y_ofs);
-
-    return jerry_undefined();
-}
-
-void jr_lv_label_init(void) {
-
-    printf("jr_lv_label_init\r\n");
-
-    /* Refer to: 10.EXT-REFERENCE-HANDLER.md  */
-    const jerryx_property_entry methods[] =
+    jerryx_property_entry methods[] =
     {
-        JERRYX_PROPERTY_FUNCTION ("setText", js_label_set_text),
         JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("setText", js_label_set_text),
         JERRYX_PROPERTY_LIST_END(),
     };
 
-    /* Create the Label constructor */
-    jerry_value_t label_constructor = jerry_function_external(js_lv_label_constructor);
-
-    /* Create the prototype object */
+    jerry_value_t constructor = jerry_function_external(constuctor_handler);
     jerry_value_t prop_obj = jerry_object();
-
-    /* Register all properties, methodes */
     jr_set_prop_list(prop_obj, methods);
-
-    /* Link the prototype to the constructor */
     jerry_value_t prototype_property = jerry_string_sz("prototype");
-    jerry_object_set(label_constructor, prototype_property, prop_obj);
+    jerry_object_set(constructor, prototype_property, prop_obj);
     jerry_value_free(prototype_property);
     jerry_value_free(prop_obj);
 
-    /* Register the Label constructor in the global object */
     jerry_value_t global_obj = jerry_current_realm();
-
-    /* Register instance/constructor */
-    jerry_value_t constructor_name = jerry_string_sz("Label");
-    jerry_object_set(global_obj, constructor_name, label_constructor);
+    jerry_value_t constructor_name = jerry_string_sz(LV_LABEL_OBJ_NAME);
+    jerry_object_set(global_obj, constructor_name, constructor);
     jerry_value_free(constructor_name);
-    jerry_value_free(label_constructor);
+    jerry_value_free(constructor);
     jerry_value_free(global_obj);
+}
+
+void jr_lv_label_init(void) {
+    printf("jr_lv_label_init\r\n");
+    jr_lv_label_class_register(js_lv_label_constructor);
 }

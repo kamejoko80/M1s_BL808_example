@@ -59,7 +59,7 @@ void jerryscript_lvgl_demo(void)
         "const screen = lv_scr_act();\n"
         "const myLabel = new Label(screen);\n"
         "myLabel.align(LV_ALIGN_CENTER, 0, 0);\n"
-        "myLabel.setText('Hello, LVGL!');\n"
+        "myLabel.setText('Hello LVGL!');\n"
         "print('Label created and displayed.');";
 #endif
 

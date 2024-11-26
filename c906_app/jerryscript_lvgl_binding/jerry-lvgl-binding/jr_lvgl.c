@@ -14,6 +14,19 @@ typedef struct _lv_event_dsc_t {
     lv_event_code_t filter : 8;
 } lv_event_dsc_t;
 
+/* This function allocates memory, please free the text pointer after using it */
+char *jr_get_string(jerry_value_t value) {
+    jerry_size_t size = jerry_string_size(value, JERRY_ENCODING_UTF8);
+    char *text = malloc(size + 1);
+    if (!text) {
+        printf("jr_get_string: memory allocation failed\n");
+        return NULL;
+    }
+    jerry_string_to_buffer(value, JERRY_ENCODING_UTF8, (jerry_char_t *)text, size);
+    text[size] = '\0';
+    return text;
+}
+
 void jr_lvgl_detach_children(lv_obj_t *parent) {
     uint32_t len = lv_obj_get_child_cnt(parent);
     lv_obj_t *grand_parent = lv_obj_get_parent(parent);
