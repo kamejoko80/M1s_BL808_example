@@ -54,6 +54,7 @@ void jerryscript_lvgl_demo(void)
         "lv_obj_align(button, 2, 0, 20);\n"
         "print('Label created and displayed.');";
 #else
+#if 0     
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -65,9 +66,20 @@ void jerryscript_lvgl_demo(void)
         "const myButton = new Button(screen);\n"
         "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
         "myButton.setSize(100, 50);\n"
-        "myButton.onPress(() => {\n"
-        "print('Button pressed!');\n"
-        "});\n"
+        "myButton.onPress(function(){\n"
+        "print('Button pressed!');\n" 
+        "});\n" 
+        "print('Button created and displayed.');";
+#endif
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "const myButton = new Button(screen);\n"
+        "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
+        "myButton.setSize(100, 50);\n"
+        "myButton.onPress(function(){\n"
+        "print('Button pressed!');\n" 
+        "});\n"       
         "print('Button created and displayed.');";        
 #endif
 

@@ -13,7 +13,7 @@
 
 // Define user data structure to store callback info
 typedef struct {
-    jerry_value_t js_callback; // JavaScript function callback
+    jerry_value_t js_callback; // JavaScript function callback  
 } btn_user_data_t;
 
 void js_lv_btn_event_cb(lv_event_t *event) {
@@ -24,16 +24,15 @@ void js_lv_btn_event_cb(lv_event_t *event) {
     btn_user_data_t *user_data = (btn_user_data_t *)lv_obj_get_user_data(btn);
     jerry_value_t callback_function = (void *)user_data->js_callback;
 
+    printf("user_data->js_callback = %u\n", user_data->js_callback);
+
     if (user_data && jerry_value_is_function(callback_function)) {
-        jerry_value_t this_val = jerry_undefined ();
-        jerry_value_t ret_val = jerry_call(callback_function, this_val, NULL, 0);
+        jerry_value_t ret_val = jerry_call(callback_function, jerry_undefined(), NULL, 0);
         if (!jerry_value_is_exception(ret_val)) {
             printf("Error during JS callback execution\n");
         }
         jerry_value_free(ret_val);
-        jerry_value_free(this_val);
     }
-    jerry_value_free(callback_function);
 }
 
 /************************************************************************
@@ -76,11 +75,13 @@ static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
     user_data->js_callback = jerry_undefined();
     lv_obj_set_user_data(btn, user_data);
 
-    jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
-                                &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
-                                btn                      /* void *native_pointer_p */
-                                );
-    return jerry_undefined();
+    // Pin the object to prevent immediate garbage collection
+    jerry_value_t js_obj = call_info_p->this_value;
+    jerry_value_copy(js_obj);  // Increase reference count
+
+    jerry_object_set_native_ptr(js_obj, &jerry_obj_native_info, btn);
+
+    return js_obj;
 }
 
 /************************************************************************
@@ -150,6 +151,9 @@ static jerry_value_t js_lv_btn_on_press(const jerry_call_info_t *call_info_p,
     }
 
     user_data->js_callback = args[0];
+        
+    printf("user_data->js_callback = %u\n", user_data->js_callback);
+        
     lv_obj_add_event_cb(btn, js_lv_btn_event_cb, LV_EVENT_CLICKED, user_data);
 
     return jerry_undefined();
