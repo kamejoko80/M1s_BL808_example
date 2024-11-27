@@ -1,30 +1,3 @@
-/*
- * LVGL Button JerryScript Bindings
- * Author: Henry Dang
- *
- * MIT License
- *
- * Copyright (c) 2024 Henry Dang
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 #include <stdio.h>
 #include "jr_lvgl.h"
 #include "js_lv_btn.h"
@@ -38,23 +11,29 @@
 * Native event handler for LVGL
 *************************************************************************/
 
+// Define user data structure to store callback info
+typedef struct {
+    jerry_value_t js_callback; // JavaScript function callback
+} btn_user_data_t;
+
 void js_lv_btn_event_cb(lv_event_t *event) {
-    
-    printf("js_lv_btn_event_cb\n");        
+
+    printf("js_lv_btn_event_cb\n");
+
     lv_obj_t *btn = lv_event_get_target(event);
-    // Retrieve the JavaScript callback from the user data
-    jerry_value_t callback = (jerry_value_t)(uintptr_t)lv_obj_get_user_data(btn);
-    if (jerry_value_is_function(callback)) {
-        jerry_value_t global_object = jerry_current_realm();
-        jerry_value_t ret_value = jerry_call(callback, global_object, NULL, 0);
-        jerry_value_free(global_object);
+    btn_user_data_t *user_data = (btn_user_data_t *)lv_obj_get_user_data(btn);
+    jerry_value_t callback_function = (void *)user_data->js_callback;
 
-        if (jerry_value_is_error(ret_value)) {
-            printf("Error in JS callback\n");
+    if (user_data && jerry_value_is_function(callback_function)) {
+        jerry_value_t this_val = jerry_undefined ();
+        jerry_value_t ret_val = jerry_call(callback_function, this_val, NULL, 0);
+        if (!jerry_value_is_exception(ret_val)) {
+            printf("Error during JS callback execution\n");
         }
-
-        jerry_value_free(ret_value);
+        jerry_value_free(ret_val);
+        jerry_value_free(this_val);
     }
+    jerry_value_free(callback_function);
 }
 
 /************************************************************************
@@ -89,7 +68,14 @@ static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
-    lv_obj_set_user_data(btn, (void *)(uintptr_t)call_info_p->this_value);
+    btn_user_data_t *user_data = (btn_user_data_t *)malloc(sizeof(btn_user_data_t));
+    if (user_data == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to allocate memory");
+    }
+
+    user_data->js_callback = jerry_undefined();
+    lv_obj_set_user_data(btn, user_data);
+
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
                                 btn                      /* void *native_pointer_p */
@@ -104,7 +90,7 @@ static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
                                   const jerry_value_t args[],
                                   const jerry_length_t args_count) {
-    // Ensure at least 3 arguments: `align`, `x_ofs`, `y_ofs`
+    // Ensure at least 3 arguments: align, x_ofs, y_ofs
     if (args_count < 3) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
     }
@@ -145,21 +131,26 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_btn_on_press(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_count) {
+    printf("js_lv_btn_on_press\n");
     if (args_count < 1 || !jerry_value_is_function(args[0])) {
+        printf("Invalid arguments. Expected a callback function.");
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected a callback function.");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
     if(btn == NULL) {
+       printf("Cannot get btn object\n");
        return jerry_undefined();
     }
 
-    // Store the JavaScript callback in the user data
-    jerry_value_t callback = jerry_value_copy(args[0]); // Retain the JS function
-    lv_obj_set_user_data(btn, (void *)callback);
+    // Attach the callback
+    btn_user_data_t *user_data = (btn_user_data_t *)lv_obj_get_user_data(btn);
+    if (user_data->js_callback) {
+        jerry_value_free(user_data->js_callback); // Free the previous callback
+    }
 
-    // Set the LVGL button event callback
-    lv_obj_add_event_cb(btn, js_lv_btn_event_cb, LV_EVENT_CLICKED, btn);
+    user_data->js_callback = args[0];
+    lv_obj_add_event_cb(btn, js_lv_btn_event_cb, LV_EVENT_CLICKED, user_data);
 
     return jerry_undefined();
 }
