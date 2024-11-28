@@ -77,10 +77,17 @@ void jerryscript_lvgl_demo(void)
         "const myButton = new Button(screen);\n"
         "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
         "myButton.setSize(100, 50);\n"
-        "myButton.onPress(function(){\n"
+        "myButton.onPress(function(event_code){\n"
         "print('Button pressed!');\n" 
-        "});\n"       
-        "print('Button created and displayed.');";        
+        "});\n";         
+        
+        #if 0
+        "myButton.onPress(function(event_code){\n"
+        "if (event_code === 7) {\n"
+        "print('Button clicked!');\n"
+        "}});\n"     
+        "print('Button created and displayed.');";
+        #endif        
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;

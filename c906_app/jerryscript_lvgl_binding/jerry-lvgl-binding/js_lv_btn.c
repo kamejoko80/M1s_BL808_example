@@ -16,23 +16,33 @@ typedef struct {
     jerry_value_t js_callback; // JavaScript function callback
 } btn_user_data_t;
 
-void js_lv_btn_event_cb(lv_event_t *event) {
+void js_lv_btn_event_cb(lv_event_t *e) {
 
     printf("js_lv_btn_event_cb\n");
 
-    lv_obj_t *btn = lv_event_get_target(event);
-    btn_user_data_t *user_data = (btn_user_data_t *)lv_obj_get_user_data(btn);
-    jerry_value_t callback_function = (void *)user_data->js_callback;
+    // Get the JavaScript callback from the user data
+    jerry_value_t js_callback = (jerry_value_t)lv_event_get_user_data(e);
 
-    printf("user_data->js_callback = %u\n", user_data->js_callback);
+    printf("Function call js_callback %u\n", js_callback);
 
-    if (user_data && jerry_value_is_function(callback_function)) {
-        jerry_value_t ret_val = jerry_call(callback_function, jerry_undefined(), NULL, 0);
-        if (!jerry_value_is_exception(ret_val)) {
-            printf("Error during JS callback execution\n");
-        }
-        jerry_value_free(ret_val);
+    if (!jerry_value_is_function(js_callback)) {
+        printf("Error: Invalid JS callback\n");
+        return;
     }
+
+    printf("Cb pass 1\r\n");
+
+    // Call the JS callback with the event code as an argument
+    jerry_value_t args[1];
+    args[0] = jerry_number(lv_event_get_code(e)); // Pass event code to JS
+    jerry_value_t result = jerry_call(js_callback, jerry_undefined(), args, 1);
+
+    if (jerry_value_is_exception(result)) {
+        printf("Error: Exception thrown in JS callback\n");
+    }
+
+    jerry_value_free(result);
+    jerry_value_free(args[0]);
 }
 
 /************************************************************************
@@ -47,6 +57,12 @@ static void js_lv_btn_destructor_cb(void *native_p, jerry_object_native_info_t *
      */
     //lv_obj_t *btn = (lv_obj_t *) native_p;
     //jr_lvgl_obj_desctruct(btn);
+    
+    // Only clean up if necessary
+    if (native_p) {
+        lv_obj_t *btn = (lv_obj_t *)native_p;
+        lv_obj_del(btn);
+    }
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
@@ -67,17 +83,16 @@ static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
-    btn_user_data_t *user_data = (btn_user_data_t *)malloc(sizeof(btn_user_data_t));
-    if (user_data == NULL) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to allocate memory");
-    }
-
-    user_data->js_callback = jerry_undefined();
-    lv_obj_set_user_data(btn, user_data);
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
-                                btn                    /* void *native_pointer_p */
+                                btn                      /* void *native_pointer_p */
                                 );
+                                
+    // Retain the JS object to prevent it from being garbage collected
+    jerry_value_t global = jerry_current_realm();
+    jerry_object_set(global, jerry_string_sz("retainedButton"), call_info_p->this_value);
+    jerry_value_free(global);                                
+                                                     
     return jerry_undefined();
 }
 
@@ -131,8 +146,7 @@ static jerry_value_t js_lv_btn_on_press(const jerry_call_info_t *call_info_p,
                                         const jerry_length_t args_count) {
     printf("js_lv_btn_on_press\n");
     if (args_count < 1 || !jerry_value_is_function(args[0])) {
-        printf("Invalid arguments. Expected a callback function.");
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected a callback function.");
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected a callback function");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
@@ -141,17 +155,18 @@ static jerry_value_t js_lv_btn_on_press(const jerry_call_info_t *call_info_p,
        return jerry_undefined();
     }
 
-    // Attach the callback
-    btn_user_data_t *user_data = (btn_user_data_t *)lv_obj_get_user_data(btn);
-    if (user_data->js_callback) {
-        jerry_value_free(user_data->js_callback); // Free the previous callback
-    }
+    printf("Pass 1\n");
+    printf("Function call %u\n", args[0]);
 
-    user_data->js_callback = args[0];
+    // Register the event callback
+    lv_obj_add_event_cb(btn, js_lv_btn_event_cb, LV_EVENT_CLICKED, (void *)args[0]);
+    printf("Pass 2\n");
 
-    printf("user_data->js_callback = %u\n", user_data->js_callback);
-
-    lv_obj_add_event_cb(btn, js_lv_btn_event_cb, LV_EVENT_CLICKED, user_data);
+    // Retain the JS function to ensure it isn't garbage collected
+    //jerry_value_t retained_callback = args[0];
+    //jerry_value_t global = jerry_current_realm();
+    //jerry_object_set(global, jerry_string_sz("retainedCallback"), retained_callback);
+    //jerry_value_free(global);
 
     return jerry_undefined();
 }
