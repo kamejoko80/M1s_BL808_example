@@ -32,7 +32,7 @@
 #include "jerryscript-ext/handlers.h"
 #include "jerryscript-ext/properties.h"
 
-#define LV_LABEL_OBJ_NAME "Label"
+#define LV_OBJ_NAME "Label"
 #define FORMAT_TEXT_SIZE  256
 
 #if 0 /* Jerryscript lvgl native binding functions (one by one) */
@@ -406,12 +406,8 @@ static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
 
 static void js_lv_label_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
     printf("js_lv_label_destructor_cb\n");
-    /*
-     * Temporally dissable because JS gabage collector
-     * automaticlly destroys the JS obj
-     */
-    //lv_obj_t *label = (lv_obj_t *) native_p;
-    //jr_lvgl_obj_desctruct(label);
+    lv_obj_t *label = (lv_obj_t *) native_p;
+    jr_lvgl_obj_desctruct(label);
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
@@ -432,8 +428,6 @@ static jerry_value_t js_lv_label_constructor(const jerry_call_info_t *call_info_
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create label");
     }
 
-    //lv_obj_align(label, 2, 0, 0);
-    lv_obj_set_user_data(label, (void *)(uintptr_t)call_info_p->this_value);
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
                                 label                    /* void *native_pointer_p */
@@ -724,7 +718,7 @@ static void jr_lv_label_class_register(jerry_external_handler_t constructor_hand
         JERRYX_PROPERTY_FUNCTION ("getTextSelectionStart", js_lv_label_get_text_selection_start),
         JERRYX_PROPERTY_FUNCTION ("getTextSelectionEnd",   js_lv_label_get_text_selection_end),
         JERRYX_PROPERTY_FUNCTION ("insText",               js_lv_label_ins_text),
-        JERRYX_PROPERTY_FUNCTION ("cutText",               js_lv_label_cut_text),        
+        JERRYX_PROPERTY_FUNCTION ("cutText",               js_lv_label_cut_text),
         JERRYX_PROPERTY_LIST_END(),
     };
 
@@ -737,7 +731,7 @@ static void jr_lv_label_class_register(jerry_external_handler_t constructor_hand
     jerry_value_free(prop_obj);
 
     jerry_value_t global_obj = jerry_current_realm();
-    jerry_value_t constructor_name = jerry_string_sz(LV_LABEL_OBJ_NAME);
+    jerry_value_t constructor_name = jerry_string_sz(LV_OBJ_NAME);
     jerry_object_set(global_obj, constructor_name, constructor);
     jerry_value_free(constructor_name);
     jerry_value_free(constructor);

@@ -18,9 +18,10 @@ typedef struct {
 } jerry_const_entry_t;
 
 typedef struct {
-    jerry_value_t target;
-    jerry_value_t func;
-} lvgl_event_user_data_t;
+    uint32_t value1;
+    uint32_t value2;
+    char     *name;
+} jerry_user_data_t;
 
 #define JERRY_CFUNC_ENTRY(cfunc, handler) {.cfunc_name = (const char *)cfunc, .cfunc_handler = handler}
 #define JERRY_CFUNC_LIST_END()            {.cfunc_name = NULL, .cfunc_handler = 0}

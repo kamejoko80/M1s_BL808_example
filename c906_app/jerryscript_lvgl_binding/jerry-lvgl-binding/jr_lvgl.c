@@ -38,29 +38,22 @@ void jr_lvgl_detach_children(lv_obj_t *parent) {
     }
 }
 
-void jr_lvgl_event_clear_user_data(lv_obj_t *obj) {
-    if(obj->spec_attr) {
-        if(obj->spec_attr->event_dsc) {
-            lvgl_event_user_data_t *user_data = (lvgl_event_user_data_t *)obj->spec_attr->event_dsc->user_data;
-            if(user_data) {
-                printf("free user_data->func\n");
-                jerry_value_free(user_data->func);
-                printf("free user_data->target\n");
-                jerry_value_free(user_data->target);
-                free(user_data);
-                obj->spec_attr->event_dsc->user_data = NULL;
-            }
-            printf("free obj->spec_attr->event_dsc\n");
-            lv_mem_free(obj->spec_attr->event_dsc);
-            obj->spec_attr->event_dsc = NULL;
+void jr_lvgl_obj_clear_user_data(lv_obj_t *obj) {
+
+    jerry_user_data_t *user_data = (jerry_user_data_t *)lv_obj_get_user_data(obj);
+    if (user_data != NULL) {
+        if (user_data->name != NULL) {
+            free(user_data->name);
         }
+        free(user_data);
+        lv_obj_set_user_data(obj, NULL);
     }
 }
 
 void jr_lvgl_obj_desctruct(lv_obj_t *obj) {
     if(obj) {
         jr_lvgl_detach_children(obj);
-        jr_lvgl_event_clear_user_data(obj);
+        jr_lvgl_obj_clear_user_data(obj);
         lv_obj_del(obj);
     }
 }

@@ -4,7 +4,7 @@
 #include "jerryscript-ext/handlers.h"
 #include "jerryscript-ext/properties.h"
 
-#define LV_LABEL_OBJ_NAME "Button"
+#define LV_OBJ_NAME "Button"
 #define FORMAT_TEXT_SIZE  256
 
 /************************************************************************
@@ -52,7 +52,13 @@ static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
-    lv_obj_set_user_data(btn, (void *)(uintptr_t)call_info_p->this_value);
+    /* user data setting example */
+    jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
+    user_data->value1 = 1;
+    user_data->value1 = 2;
+    user_data->name = strdup("Some text");
+    lv_obj_set_user_data(btn, user_data);
+      
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
                                 btn                      /* void *native_pointer_p */
@@ -146,7 +152,7 @@ static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handle
     jerry_value_free(prop_obj);
 
     jerry_value_t global_obj = jerry_current_realm();
-    jerry_value_t constructor_name = jerry_string_sz(LV_LABEL_OBJ_NAME);
+    jerry_value_t constructor_name = jerry_string_sz(LV_OBJ_NAME);
     jerry_object_set(global_obj, constructor_name, constructor);
     jerry_value_free(constructor_name);
     jerry_value_free(constructor);
