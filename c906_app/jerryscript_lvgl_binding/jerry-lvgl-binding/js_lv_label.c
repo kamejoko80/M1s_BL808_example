@@ -33,7 +33,6 @@
 #include "jerryscript-ext/properties.h"
 
 #define LV_OBJ_NAME "Label"
-#define FORMAT_TEXT_SIZE  256
 
 #if 0 /* Jerryscript lvgl native binding functions (one by one) */
 static jerry_value_t js_lv_obj_align(const jerry_call_info_t *call_info_p,

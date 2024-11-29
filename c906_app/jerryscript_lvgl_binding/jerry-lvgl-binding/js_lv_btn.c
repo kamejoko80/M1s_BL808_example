@@ -4,17 +4,18 @@
 #include "jerryscript-ext/handlers.h"
 #include "jerryscript-ext/properties.h"
 
-#define LV_OBJ_NAME "Button"
-#define FORMAT_TEXT_SIZE  256
+/* Change the object appropriately */
+#define LV_OBJ_NAME           "Button"
+#define LV_OBJ_CREATE(parent) lv_btn_create(parent)
 
 /************************************************************************
 * Native event handler for LVGL
 *************************************************************************/
 
-void js_lv_btn_event_cb(lv_event_t *e) {
+void js_lv_obj_event_cb(lv_event_t *e) {
 
     /* Get the JavaScript callback from the user data */
-    jerry_value_t js_callback = (jerry_value_t)lv_event_get_user_data(e);
+    jerry_value_t js_callback = (jerry_value_t)(uintptr_t)lv_event_get_user_data(e);
 
     /* Call the JS callback with the event code as an argument */
     jerry_value_t args[1];
@@ -28,27 +29,27 @@ void js_lv_btn_event_cb(lv_event_t *e) {
 * Constructor & Desctructor
 *************************************************************************/
 
-static void js_lv_btn_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
-    printf("js_lv_btn_destructor_cb\n");
+static void js_lv_obj_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
+    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     lv_obj_t *btn = (lv_obj_t *) native_p;
     jr_lvgl_obj_desctruct(btn);
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
-    .free_cb = js_lv_btn_destructor_cb,
+    .free_cb = js_lv_obj_destructor_cb,
 };
 
-static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
+static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
                                            const jerry_value_t args[],
                                            const jerry_length_t args_count) {
-    printf("js_lv_btn_constructor\n");
+    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_object(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected object .");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, parent, args[0], NULL);
-    lv_obj_t *btn = lv_btn_create(parent);
-    if (btn == NULL) {
+    lv_obj_t *obj = LV_OBJ_CREATE(parent);
+    if (obj == NULL) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
@@ -57,11 +58,11 @@ static jerry_value_t js_lv_btn_constructor(const jerry_call_info_t *call_info_p,
     user_data->value1 = 1;
     user_data->value1 = 2;
     user_data->name = strdup("Some text");
-    lv_obj_set_user_data(btn, user_data);
+    lv_obj_set_user_data(obj, user_data);
       
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
-                                btn                      /* void *native_pointer_p */
+                                obj                      /* void *native_pointer_p */
                                 );
     return jerry_undefined();
 }
@@ -78,8 +79,8 @@ static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
     }
 
-    JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
-    if(btn == NULL) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if(obj == NULL) {
        return jerry_undefined();
     }
 
@@ -88,7 +89,7 @@ static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
     lv_coord_t y_ofs = (lv_coord_t)jerry_value_as_number(args[2]);
 
     // Call LVGL function
-    lv_obj_align(btn, align, x_ofs, y_ofs);
+    lv_obj_align(obj, align, x_ofs, y_ofs);
 
     return jerry_undefined();
 }
@@ -100,31 +101,31 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected (width, height)");
     }
 
-    JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
-    if(btn == NULL) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if(obj == NULL) {
        return jerry_undefined();
     }
 
     lv_coord_t width = (lv_coord_t)jerry_value_as_number(args[0]);
     lv_coord_t height = (lv_coord_t)jerry_value_as_number(args[1]);
-    lv_obj_set_size(btn, width, height);
+    lv_obj_set_size(obj, width, height);
     return jerry_undefined();
 }
 
-static jerry_value_t js_lv_btn_on_press(const jerry_call_info_t *call_info_p,
+static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_count) {
     if (args_count < 1 || !jerry_value_is_function(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected a callback function");
     }
 
-    JERRY_GET_NATIVE_PTR(lv_obj_t, btn, call_info_p->this_value, &jerry_obj_native_info);
-    if(btn == NULL) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if(obj == NULL) {
        return jerry_undefined();
     }
 
     // Register the event callback
-    lv_obj_add_event_cb(btn, js_lv_btn_event_cb, LV_EVENT_CLICKED, (void *)args[0]);
+    lv_obj_add_event_cb(obj, js_lv_obj_event_cb, LV_EVENT_CLICKED, (void *)(uintptr_t)args[0]);
 
     return jerry_undefined();
 }
@@ -139,7 +140,7 @@ static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handle
     {
         JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
         JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
-        JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_btn_on_press),
+        JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_obj_on_press),
         JERRYX_PROPERTY_LIST_END(),
     };
 
@@ -160,5 +161,5 @@ static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handle
 }
 
 void jr_lv_btn_init(void) {
-    jr_lv_btn_class_register(js_lv_btn_constructor);
+    jr_lv_btn_class_register(js_lv_obj_constructor);
 }
