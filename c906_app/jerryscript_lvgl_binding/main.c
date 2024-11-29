@@ -42,19 +42,6 @@ static void lvgl_task(void *param)
 
 void jerryscript_lvgl_demo(void)
 {
-#if 0
-    const jerry_char_t script[] =
-        "print('LVGL initialization done.');\n"
-        "const screen = lv_scr_act();\n"
-        "const label = lv_label_create(screen);\n"
-        "const button = lv_btn_create(screen);\n"
-        "lv_label_set_text(label, 'Hello, JerryScript!');\n"
-        "lv_obj_align(label, 2, 0, 0);\n"
-        "lv_obj_set_size(button, 100, 50);\n"
-        "lv_obj_align(button, 2, 0, 20);\n"
-        "print('Label created and displayed.');";
-#else
-#if 0     
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -66,29 +53,11 @@ void jerryscript_lvgl_demo(void)
         "const myButton = new Button(screen);\n"
         "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
         "myButton.setSize(100, 50);\n"
-        "myButton.onPress(function(){\n"
-        "print('Button pressed!');\n" 
-        "});\n" 
-        "print('Button created and displayed.');";
-#endif
-    const jerry_char_t script[] =
-        "print('LVGL initialization done.');\n"
-        "const screen = lv_scr_act();\n"
-        "const myButton = new Button(screen);\n"
-        "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
-        "myButton.setSize(100, 50);\n"
-        "myButton.onPress(function(event_code){\n"
-        "print('Button pressed!');\n" 
-        "});\n";         
-        
-        #if 0
         "myButton.onPress(function(event_code){\n"
         "if (event_code === 7) {\n"
         "print('Button clicked!');\n"
-        "}});\n"     
+        "}});\n"
         "print('Button created and displayed.');";
-        #endif        
-#endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
 
@@ -97,7 +66,7 @@ void jerryscript_lvgl_demo(void)
 
     /* Register the adder function in the global object */
     jr_gbl_const_init();
-    jr_gbl_func_init();    
+    jr_gbl_func_init();
     jr_lv_label_init();
     jr_lv_btn_init();
 
@@ -119,8 +88,8 @@ void jerryscript_lvgl_demo(void)
     /* Parsed source code must be freed */
     jerry_value_free(parsed_code);
 
-    /* Cleanup engine */
-    jerry_cleanup();
+    /* Cleanup engine this cause object destructor callback call */
+    //jerry_cleanup();
 }
 
 void main()
