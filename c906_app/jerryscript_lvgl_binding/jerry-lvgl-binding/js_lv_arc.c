@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include "jr_lvgl.h"
-#include "js_lv_btn.h"
+#include "js_lv_arc.h"
 #include "jerryscript-ext/handlers.h"
 #include "jerryscript-ext/properties.h"
 
 /* Change the object appropriately */
-#define LV_OBJ_NAME           "Button"
-#define LV_OBJ_CREATE(parent) lv_btn_create(parent)
+#define LV_OBJ_NAME           "Arc"
+#define LV_OBJ_CREATE(parent) lv_arc_create(parent)
 
 /************************************************************************
 * Native event handler for LVGL
@@ -31,8 +31,8 @@ static void js_lv_obj_event_cb(lv_event_t *e) {
 
 static void js_lv_obj_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
     printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
-    lv_obj_t *btn = (lv_obj_t *) native_p;
-    jr_lvgl_obj_desctruct(btn);
+    lv_obj_t *obj = (lv_obj_t *) native_p;
+    jr_lvgl_obj_desctruct(obj);
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
@@ -53,13 +53,6 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
-    /* user data setting example */
-    jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
-    user_data->value1 = 1;
-    user_data->value1 = 2;
-    user_data->name = strdup("Some text");
-    lv_obj_set_user_data(obj, user_data);
-      
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
                                 obj                      /* void *native_pointer_p */
@@ -112,6 +105,43 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
+static jerry_value_t js_lv_obj_set_range(const jerry_call_info_t *call_info_p,
+                                         const jerry_value_t args[],
+                                         const jerry_length_t args_count) {
+    if (args_count < 3 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (arc, min, max)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if(obj == NULL) {
+       return jerry_undefined();
+    }
+
+    int32_t min = (int32_t)jerry_value_as_number(args[1]);
+    int32_t max = (int32_t)jerry_value_as_number(args[2]);
+    lv_arc_set_range(obj, min, max);
+
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_obj_set_value(const jerry_call_info_t *call_info_p,
+                                         const jerry_value_t args[],
+                                         const jerry_length_t args_count) {
+    if (args_count < 2 || !jerry_value_is_number(args[1])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (arc, value)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if(obj == NULL) {
+       return jerry_undefined();
+    }
+
+    int32_t value = (int32_t)jerry_value_as_number(args[1]);
+    lv_arc_set_value(obj, value);
+
+    return jerry_undefined();
+}
+
 static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_count) {
@@ -138,9 +168,11 @@ static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handle
 
     jerryx_property_entry methods[] =
     {
-        JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
-        JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
-        JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_obj_on_press),
+        JERRYX_PROPERTY_FUNCTION ("align",    js_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("setSize",  js_lv_obj_set_size),
+        JERRYX_PROPERTY_FUNCTION ("setRange", js_lv_obj_set_range),
+        JERRYX_PROPERTY_FUNCTION ("setValue", js_lv_obj_set_value),        
+        JERRYX_PROPERTY_FUNCTION ("onPress",  js_lv_obj_on_press),
         JERRYX_PROPERTY_LIST_END(),
     };
 
@@ -160,6 +192,6 @@ static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handle
     jerry_value_free(global_obj);
 }
 
-void jr_lv_btn_init(void) {
+void jr_lv_arc_init(void) {
     jr_lv_btn_class_register(js_lv_obj_constructor);
 }

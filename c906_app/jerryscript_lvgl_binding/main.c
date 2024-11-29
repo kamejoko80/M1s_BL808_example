@@ -30,6 +30,7 @@
 #include "js_gbl_func.h"
 #include "js_lv_label.h"
 #include "js_lv_btn.h"
+#include "js_lv_arc.h"
 
 static void lvgl_task(void *param)
 {
@@ -52,11 +53,16 @@ void jerryscript_lvgl_demo(void)
         "print('Label created and displayed.');"
         "const myButton = new Button(screen);\n"
         "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
-        "myButton.setSize(100, 50);\n"
+        "myButton.setSize(60, 60);\n"
         "myButton.onPress(function(event_code){\n"
         "if (event_code === 7) {\n"
         "print('Button clicked!');\n"
         "}});\n"
+        "let myArc = new Arc(screen);\n"
+        "myButton.setSize(100, 100);\n"
+        "myArc.align(LV_ALIGN_TOP_MID, 0, 0);\n"
+        "myArc.setRange(0, 100);\n"
+        "myArc.setValue(75);\n"
         "print('Button created and displayed.');";
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -69,6 +75,7 @@ void jerryscript_lvgl_demo(void)
     jr_gbl_func_init();
     jr_lv_label_init();
     jr_lv_btn_init();
+    jr_lv_arc_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
