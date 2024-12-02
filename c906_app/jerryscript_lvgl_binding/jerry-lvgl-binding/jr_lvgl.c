@@ -80,7 +80,7 @@ void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries) {
     jerry_value_free(global_object);
 }
 
-void jr_register_global_constant_list(jerry_value_t global_obj, jerry_const_entry_t *entries)
+void jr_register_global_constant_list(jerry_value_t global_obj, const jerry_const_entry_t *entries)
 {
     for (uint32_t idx = 0; (entries[idx].name != NULL); idx++)
     {

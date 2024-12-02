@@ -62,7 +62,15 @@ void jerryscript_lvgl_demo(void)
         "myButton.setSize(100, 100);\n"
         "myArc.align(LV_ALIGN_TOP_MID, 0, 0);\n"
         "myArc.setRange(0, 100);\n"
-        "myArc.setValue(75);\n"
+        "myArc.setStartAngle(45);\n"
+        "myArc.setEndAngle(270);\n"
+        "myArc.setBgStartAngle(0);\n"
+        "myArc.setBgEndAngle(360);\n"
+        "myArc.setAngles(0, 180);\n"        
+        "myArc.setRotation(90);\n"
+        "myArc.setMode(LV_ARC_MODE_REVERSE);\n"
+        "myArc.setValue(50);\n"
+        "myArc.alignObjToAngle(myLabel, 50);\n"
         "print('Button created and displayed.');";
 
     const jerry_length_t script_size = sizeof (script) - 1;
