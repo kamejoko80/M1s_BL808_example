@@ -32,8 +32,8 @@
 #include "jerryscript-ext/properties.h"
 
 /* Change the object appropriately */
-#define LV_OBJ_NAME           "Template"
-#define LV_OBJ_CREATE(parent) lv_btn_create(parent)
+#define LV_OBJ_NAME           "Bar"
+#define LV_OBJ_CREATE(parent) lv_bar_create(parent)
 
 /************************************************************************
 * Native event handler for LVGL
@@ -139,6 +139,141 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
+static jerry_value_t js_lv_obj_set_value(const jerry_call_info_t *call_info_p,
+                                         const jerry_value_t args[],
+                                         const jerry_length_t args_count) {
+    if (args_count < 2 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (value, anim)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    int32_t value = (int32_t)jerry_value_as_number(args[1]);
+    lv_anim_enable_t anim = (lv_anim_enable_t)jerry_value_as_number(args[2]);
+
+    lv_bar_set_value(obj, value, anim);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_bar_set_start_value(const jerry_call_info_t *call_info_p,
+                                               const jerry_value_t args[],
+                                               const jerry_length_t args_count) {
+    if (args_count < 2 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (start_value, anim)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    int32_t start_value = (int32_t)jerry_value_as_number(args[1]);
+    lv_anim_enable_t anim = (lv_anim_enable_t)jerry_value_as_number(args[2]);
+
+    lv_bar_set_start_value(obj, start_value, anim);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_bar_set_range(const jerry_call_info_t *call_info_p,
+                                         const jerry_value_t args[],
+                                         const jerry_length_t args_count) {
+    if (args_count < 2 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (min, max)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    int32_t min = (int32_t)jerry_value_as_number(args[1]);
+    int32_t max = (int32_t)jerry_value_as_number(args[2]);
+
+    lv_bar_set_range(obj, min, max);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_bar_set_mode(const jerry_call_info_t *call_info_p,
+                                        const jerry_value_t args[],
+                                        const jerry_length_t args_count) {
+    if (args_count < 1 || !jerry_value_is_number(args[1])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (mode)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    lv_bar_mode_t mode = (lv_bar_mode_t)jerry_value_as_number(args[1]);
+
+    lv_bar_set_mode(obj, mode);
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_bar_get_value(const jerry_call_info_t *call_info_p,
+                                         const jerry_value_t args[],
+                                         const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    int32_t value = lv_bar_get_value(obj);
+    return jerry_number(value);
+}
+
+static jerry_value_t js_lv_bar_get_start_value(const jerry_call_info_t *call_info_p,
+                                               const jerry_value_t args[],
+                                               const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    int32_t start_value = lv_bar_get_start_value(obj);
+    return jerry_number(start_value);
+}
+
+static jerry_value_t js_lv_bar_get_min_value(const jerry_call_info_t *call_info_p,
+                                             const jerry_value_t args[],
+                                             const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    int32_t min_value = lv_bar_get_min_value(obj);
+    return jerry_number(min_value);
+}
+
+static jerry_value_t js_lv_bar_get_max_value(const jerry_call_info_t *call_info_p,
+                                             const jerry_value_t args[],
+                                             const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    int32_t max_value = lv_bar_get_max_value(obj);
+    return jerry_number(max_value);
+}
+
+static jerry_value_t js_lv_bar_get_mode(const jerry_call_info_t *call_info_p,
+                                        const jerry_value_t args[],
+                                        const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_undefined();
+    }
+
+    lv_bar_mode_t mode = lv_bar_get_mode(obj);
+    return jerry_number(mode);
+}
+
 static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_count) {
@@ -165,9 +300,18 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
 
     jerryx_property_entry methods[] =
     {
-        JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
-        JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
-        JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_obj_on_press),
+        JERRYX_PROPERTY_FUNCTION ("align",         js_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("setSize",       js_lv_obj_set_size),
+        JERRYX_PROPERTY_FUNCTION ("setValue",      js_lv_obj_set_value),
+        JERRYX_PROPERTY_FUNCTION ("setStartValue", js_lv_bar_set_start_value),
+        JERRYX_PROPERTY_FUNCTION ("setRange",      js_lv_bar_set_range),
+        JERRYX_PROPERTY_FUNCTION ("setMode",       js_lv_bar_set_mode),        
+        JERRYX_PROPERTY_FUNCTION ("getValue",      js_lv_bar_get_value),
+        JERRYX_PROPERTY_FUNCTION ("getStartValue", js_lv_bar_get_start_value),
+        JERRYX_PROPERTY_FUNCTION ("getMinValue",   js_lv_bar_get_min_value),        
+        JERRYX_PROPERTY_FUNCTION ("getMaxValue",   js_lv_bar_get_max_value), 
+        JERRYX_PROPERTY_FUNCTION ("getMode",       js_lv_bar_get_mode),
+        JERRYX_PROPERTY_FUNCTION ("onPress",       js_lv_obj_on_press),
         JERRYX_PROPERTY_LIST_END(),
     };
 
@@ -187,6 +331,6 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
     jerry_value_free(global_obj);
 }
 
-void jr_lv_template_init(void) {
+void jr_lv_bar_init(void) {
     jr_lv_obj_class_register(js_lv_obj_constructor);
 }

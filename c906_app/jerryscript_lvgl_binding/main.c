@@ -31,6 +31,7 @@
 #include "js_lv_label.h"
 #include "js_lv_btn.h"
 #include "js_lv_arc.h"
+#include "js_lv_bar.h"
 
 static void lvgl_task(void *param)
 {
@@ -50,7 +51,6 @@ void jerryscript_lvgl_demo(void)
         "myLabel.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myLabel.setText('Hello LVGL!');\n"
         "print(myLabel.getText());\n"
-        "print('Label created and displayed.');"
         "const myButton = new Button(screen);\n"
         "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
         "myButton.setSize(60, 60);\n"
@@ -59,19 +59,22 @@ void jerryscript_lvgl_demo(void)
         "print('Button clicked!');\n"
         "}});\n"
         "let myArc = new Arc(screen);\n"
-        "myButton.setSize(100, 100);\n"
-        "myArc.align(LV_ALIGN_TOP_MID, 0, 0);\n"
+        "myButton.setSize(50, 50);\n"
+        "myArc.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myArc.setRange(0, 100);\n"
         "myArc.setStartAngle(45);\n"
         "myArc.setEndAngle(270);\n"
         "myArc.setBgStartAngle(0);\n"
         "myArc.setBgEndAngle(360);\n"
-        "myArc.setAngles(0, 180);\n"        
+        "myArc.setAngles(0, 180);\n"
         "myArc.setRotation(90);\n"
         "myArc.setMode(LV_ARC_MODE_REVERSE);\n"
         "myArc.setValue(50);\n"
         "myArc.alignObjToAngle(myLabel, 50);\n"
-        "print('Button created and displayed.');";
+        "let myBar = new Bar(screen);\n"
+        "myBar.setSize(150, 20);\n"
+        "myBar.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "myBar.setValue(50, ANIM_ON);\n";
 
     const jerry_length_t script_size = sizeof (script) - 1;
 
@@ -84,6 +87,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_label_init();
     jr_lv_btn_init();
     jr_lv_arc_init();
+    jr_lv_bar_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
