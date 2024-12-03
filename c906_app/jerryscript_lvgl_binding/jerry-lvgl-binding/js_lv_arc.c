@@ -424,7 +424,7 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
 * Class register functions
 *************************************************************************/
 
-static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handler) {
+static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handler) {
 
     jerryx_property_entry methods[] =
     {
@@ -469,5 +469,5 @@ static void jr_lv_btn_class_register(jerry_external_handler_t constructor_handle
 }
 
 void jr_lv_arc_init(void) {
-    jr_lv_btn_class_register(js_lv_obj_constructor);
+    jr_lv_obj_class_register(js_lv_obj_constructor);
 }

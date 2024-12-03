@@ -5,7 +5,7 @@
 #include "jerryscript-ext/properties.h"
 
 /* Change the object appropriately */
-#define LV_OBJ_NAME           "Button"
+#define LV_OBJ_NAME           "Template"
 #define LV_OBJ_CREATE(parent) lv_btn_create(parent)
 
 /************************************************************************
@@ -160,6 +160,6 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
     jerry_value_free(global_obj);
 }
 
-void jr_lv_btn_init(void) {
+void jr_lv_template_init(void) {
     jr_lv_obj_class_register(js_lv_obj_constructor);
 }
