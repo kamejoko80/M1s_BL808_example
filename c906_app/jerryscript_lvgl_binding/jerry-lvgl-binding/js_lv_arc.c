@@ -67,7 +67,6 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
                                   const jerry_value_t args[],
                                   const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     // Ensure at least 3 arguments: align, x_ofs, y_ofs
     if (args_count < 3) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
@@ -84,15 +83,12 @@ static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
 
     // Call LVGL function
     lv_obj_align(obj, align, x_ofs, y_ofs);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
 static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_cnt) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_cnt < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected (width, height)");
     }
@@ -105,8 +101,6 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
     lv_coord_t width = (lv_coord_t)jerry_value_as_number(args[0]);
     lv_coord_t height = (lv_coord_t)jerry_value_as_number(args[1]);
     lv_obj_set_size(obj, width, height);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -114,7 +108,6 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_start_angle(const jerry_call_info_t *call_info_p,
                                                const jerry_value_t args[],
                                                const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (start)");
     }
@@ -126,8 +119,6 @@ static jerry_value_t js_lv_obj_set_start_angle(const jerry_call_info_t *call_inf
 
     uint16_t start = (uint16_t)jerry_value_as_number(args[0]);
     lv_arc_set_start_angle(obj, start);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -135,7 +126,6 @@ static jerry_value_t js_lv_obj_set_start_angle(const jerry_call_info_t *call_inf
 static jerry_value_t js_lv_obj_set_end_angle(const jerry_call_info_t *call_info_p,
                                              const jerry_value_t args[],
                                              const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (end)");
     }
@@ -147,8 +137,6 @@ static jerry_value_t js_lv_obj_set_end_angle(const jerry_call_info_t *call_info_
 
     uint16_t end = (uint16_t)jerry_value_as_number(args[0]);
     lv_arc_set_end_angle(obj, end);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -156,7 +144,6 @@ static jerry_value_t js_lv_obj_set_end_angle(const jerry_call_info_t *call_info_
 static jerry_value_t js_lv_obj_set_angles(const jerry_call_info_t *call_info_p,
                                           const jerry_value_t args[],
                                           const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (start, end)");
     }
@@ -169,8 +156,6 @@ static jerry_value_t js_lv_obj_set_angles(const jerry_call_info_t *call_info_p,
     uint16_t start = (uint16_t)jerry_value_as_number(args[0]);
     uint16_t end = (uint16_t)jerry_value_as_number(args[1]);
     lv_arc_set_angles(obj, start, end);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -178,7 +163,6 @@ static jerry_value_t js_lv_obj_set_angles(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_bg_start_angle(const jerry_call_info_t *call_info_p,
                                                   const jerry_value_t args[],
                                                   const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (arc, start)");
     }
@@ -190,8 +174,6 @@ static jerry_value_t js_lv_obj_set_bg_start_angle(const jerry_call_info_t *call_
 
     uint16_t start = (uint16_t)jerry_value_as_number(args[0]);
     lv_arc_set_bg_start_angle(obj, start);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -199,7 +181,6 @@ static jerry_value_t js_lv_obj_set_bg_start_angle(const jerry_call_info_t *call_
 static jerry_value_t js_lv_obj_set_bg_end_angle(const jerry_call_info_t *call_info_p,
                                                 const jerry_value_t args[],
                                                 const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (end)");
     }
@@ -211,8 +192,6 @@ static jerry_value_t js_lv_obj_set_bg_end_angle(const jerry_call_info_t *call_in
 
     uint16_t end = (uint16_t)jerry_value_as_number(args[0]);
     lv_arc_set_bg_end_angle(obj, end);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -220,7 +199,6 @@ static jerry_value_t js_lv_obj_set_bg_end_angle(const jerry_call_info_t *call_in
 static jerry_value_t js_lv_obj_set_bg_angles(const jerry_call_info_t *call_info_p,
                                              const jerry_value_t args[],
                                              const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (start, end)");
     }
@@ -233,8 +211,6 @@ static jerry_value_t js_lv_obj_set_bg_angles(const jerry_call_info_t *call_info_
     uint16_t start = (uint16_t)jerry_value_as_number(args[0]);
     uint16_t end = (uint16_t)jerry_value_as_number(args[1]);
     lv_arc_set_bg_angles(obj, start, end);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -242,7 +218,6 @@ static jerry_value_t js_lv_obj_set_bg_angles(const jerry_call_info_t *call_info_
 static jerry_value_t js_lv_obj_set_rotation(const jerry_call_info_t *call_info_p,
                                             const jerry_value_t args[],
                                             const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (rotation)");
     }
@@ -254,8 +229,6 @@ static jerry_value_t js_lv_obj_set_rotation(const jerry_call_info_t *call_info_p
 
     uint16_t rotation = (uint16_t)jerry_value_as_number(args[0]);
     lv_arc_set_rotation(obj, rotation);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -263,7 +236,6 @@ static jerry_value_t js_lv_obj_set_rotation(const jerry_call_info_t *call_info_p
 static jerry_value_t js_lv_obj_set_mode(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (mode)");
     }
@@ -275,8 +247,6 @@ static jerry_value_t js_lv_obj_set_mode(const jerry_call_info_t *call_info_p,
 
     lv_arc_mode_t mode = (lv_arc_mode_t)jerry_value_as_number(args[0]);
     lv_arc_set_mode(obj, mode);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -284,7 +254,6 @@ static jerry_value_t js_lv_obj_set_mode(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_value(const jerry_call_info_t *call_info_p,
                                          const jerry_value_t args[],
                                          const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (value)");
     }
@@ -296,8 +265,6 @@ static jerry_value_t js_lv_obj_set_value(const jerry_call_info_t *call_info_p,
 
     int16_t value = (int16_t)jerry_value_as_number(args[0]);
     lv_arc_set_value(obj, value);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -305,7 +272,6 @@ static jerry_value_t js_lv_obj_set_value(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_range(const jerry_call_info_t *call_info_p,
                                          const jerry_value_t args[],
                                          const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (min, max)");
     }
@@ -318,8 +284,6 @@ static jerry_value_t js_lv_obj_set_range(const jerry_call_info_t *call_info_p,
     int32_t min = (int32_t)jerry_value_as_number(args[0]);
     int32_t max = (int32_t)jerry_value_as_number(args[1]);
     lv_arc_set_range(obj, min, max);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -327,15 +291,12 @@ static jerry_value_t js_lv_obj_set_range(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_get_angle_start(const jerry_call_info_t *call_info_p,
                                                const jerry_value_t args[],
                                                const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
     }
 
     uint16_t angle = lv_arc_get_angle_start(obj);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_number(angle);
 }
 
@@ -343,15 +304,12 @@ static jerry_value_t js_lv_obj_get_angle_start(const jerry_call_info_t *call_inf
 static jerry_value_t js_lv_obj_get_angle_end(const jerry_call_info_t *call_info_p,
                                              const jerry_value_t args[],
                                              const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
     }
 
     uint16_t angle = lv_arc_get_angle_end(obj);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_number(angle);
 }
 
@@ -359,15 +317,12 @@ static jerry_value_t js_lv_obj_get_angle_end(const jerry_call_info_t *call_info_
 static jerry_value_t js_lv_obj_get_bg_angle_start(const jerry_call_info_t *call_info_p,
                                                   const jerry_value_t args[],
                                                   const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
     }
 
     uint16_t angle = lv_arc_get_bg_angle_start(obj);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_number(angle);
 }
 
@@ -375,15 +330,12 @@ static jerry_value_t js_lv_obj_get_bg_angle_start(const jerry_call_info_t *call_
 static jerry_value_t js_lv_obj_get_bg_angle_end(const jerry_call_info_t *call_info_p,
                                                 const jerry_value_t args[],
                                                 const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
     }
 
     uint16_t angle = lv_arc_get_bg_angle_end(obj);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_number(angle);
 }
 
@@ -391,15 +343,12 @@ static jerry_value_t js_lv_obj_get_bg_angle_end(const jerry_call_info_t *call_in
 static jerry_value_t js_lv_obj_get_value(const jerry_call_info_t *call_info_p,
                                          const jerry_value_t args[],
                                          const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(const lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
     }
 
     int16_t value = lv_arc_get_value(obj);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_number(value);
 }
 
@@ -407,15 +356,12 @@ static jerry_value_t js_lv_obj_get_value(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_get_min_value(const jerry_call_info_t *call_info_p,
                                              const jerry_value_t args[],
                                              const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(const lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
     }
 
     int16_t value = lv_arc_get_min_value(obj);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_number(value);
 }
 
@@ -423,7 +369,6 @@ static jerry_value_t js_lv_obj_get_min_value(const jerry_call_info_t *call_info_
 static jerry_value_t js_lv_obj_align_obj_to_angle(const jerry_call_info_t *call_info_p,
                                                   const jerry_value_t args[],
                                                   const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 2 || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (obj_to_align, r_offset)");
     }
@@ -436,8 +381,6 @@ static jerry_value_t js_lv_obj_align_obj_to_angle(const jerry_call_info_t *call_
 
     lv_coord_t r_offset = (lv_coord_t)jerry_value_as_number(args[1]);
     lv_arc_align_obj_to_angle(obj, obj_to_align, r_offset);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);;
     return jerry_undefined();
 }
 
@@ -445,7 +388,6 @@ static jerry_value_t js_lv_obj_align_obj_to_angle(const jerry_call_info_t *call_
 static jerry_value_t js_lv_obj_rotate_obj_to_angle(const jerry_call_info_t *call_info_p,
                                                    const jerry_value_t args[],
                                                    const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 2 || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (obj_to_rotate, r_offset)");
     }
@@ -458,8 +400,6 @@ static jerry_value_t js_lv_obj_rotate_obj_to_angle(const jerry_call_info_t *call
 
     lv_coord_t r_offset = (lv_coord_t)jerry_value_as_number(args[1]);
     lv_arc_rotate_obj_to_angle(obj, obj_to_rotate, r_offset);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
@@ -477,8 +417,6 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
 
     // Register the event callback
     lv_obj_add_event_cb(obj, js_lv_obj_event_cb, LV_EVENT_CLICKED, (void *)(uintptr_t)args[0]);
-
-    printf("%s %s success\n", LV_OBJ_NAME, __FUNCTION__);
     return jerry_undefined();
 }
 
