@@ -139,13 +139,13 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-#if 0
-
-static jerry_value_t js_lv_obj_set_map(const jerry_call_info_t *call_info_p,
-                                       const jerry_value_t args[],
-                                       const jerry_length_t args_count) {
-    if (args_count < 2 || !jerry_value_is_array(args[1])) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (map)");
+static jerry_value_t js_lv_obj_set_map (const jerry_call_info_t *call_info_p,
+                                        const jerry_value_t args_p[],
+                                        const jerry_length_t args_count)
+{
+    if (args_count < 1 || !jerry_value_is_array (args_p[0]))
+    {
+        return jerry_throw_sz (JERRY_ERROR_TYPE, "Expected an array as the first argument");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
@@ -153,28 +153,46 @@ static jerry_value_t js_lv_obj_set_map(const jerry_call_info_t *call_info_p,
         return jerry_undefined();
     }
 
-    uint32_t len = jerry_get_array_length(args[1]);
-    const char *map[len + 1];
-    for (uint32_t i = 0; i < len; i++) {
-        jerry_value_t item = jerry_get_property_by_index(args[1], i);
-        if (!jerry_value_is_string(item)) {
-            return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected strings in map");
+    uint32_t len = jerry_array_length (args_p[0]);
+    const char **map = malloc ((len + 1) * sizeof (char *));
+    if (map == NULL)
+    {
+        return jerry_throw_sz (JERRY_ERROR_TYPE, "Memory allocation failed");
+    }
+
+    for (uint32_t i = 0; i < len; i++)
+    {
+        jerry_value_t item = jerry_object_get_index (args_p[0], i);
+        if (!jerry_value_is_string (item))
+        {
+        free (map);
+        return jerry_throw_sz (JERRY_ERROR_TYPE, "Expected strings in the array");
         }
-        size_t size = jerry_get_string_size(item);
-        map[i] = malloc(size + 1);
-        jerry_string_to_char_buffer(item, (jerry_char_t *)map[i], size);
-        map[i][size] = '\0';
-        jerry_release_value(item);
+
+        jerry_size_t size = jerry_string_size (item, JERRY_ENCODING_UTF8);
+        char *str = malloc (size + 1);
+        if (str == NULL)
+        {
+        free (map);
+        return jerry_throw_sz (JERRY_ERROR_TYPE, "Memory allocation failed");
+        }
+
+        jerry_string_to_buffer (item, JERRY_ENCODING_UTF8, (jerry_char_t *)str, size);
+        str[size] = '\0';
+        map[i] = str;
+        jerry_value_free (item);
     }
     map[len] = NULL;
 
-    lv_btnmatrix_set_map(obj, map);
+    lv_btnmatrix_set_map (obj, map);
 
-    for (uint32_t i = 0; i < len; i++) {
-        free((void *)map[i]);
+    for (uint32_t i = 0; i < len; i++)
+    {
+        free ((void *)map[i]);
     }
+    free (map);
 
-    return jerry_undefined();
+    return jerry_undefined ();
 }
 
 static jerry_value_t js_lv_obj_set_ctrl_map(const jerry_call_info_t *call_info_p,
@@ -189,18 +207,24 @@ static jerry_value_t js_lv_obj_set_ctrl_map(const jerry_call_info_t *call_info_p
         return jerry_undefined();
     }
 
-    uint32_t len = jerry_get_array_length(args[1]);
-    lv_btnmatrix_ctrl_t ctrl_map[len];
+    uint32_t len = jerry_array_length(args[1]);
+    lv_btnmatrix_ctrl_t *ctrl_map = malloc(len * sizeof(lv_btnmatrix_ctrl_t));
+    if (ctrl_map == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
+    }
+
     for (uint32_t i = 0; i < len; i++) {
-        jerry_value_t item = jerry_get_property_by_index(args[1], i);
+        jerry_value_t item = jerry_object_get_index(args[1], i);
         if (!jerry_value_is_number(item)) {
+            free(ctrl_map);
             return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected numbers in ctrl_map");
         }
         ctrl_map[i] = (lv_btnmatrix_ctrl_t)jerry_value_as_number(item);
-        jerry_release_value(item);
+        jerry_value_free(item);
     }
 
     lv_btnmatrix_set_ctrl_map(obj, ctrl_map);
+    free(ctrl_map);
     return jerry_undefined();
 }
 
@@ -339,30 +363,37 @@ static jerry_value_t js_lv_obj_set_one_checked(const jerry_call_info_t *call_inf
     return jerry_undefined();
 }
 
-static jerry_value_t js_lv_obj_get_map(const jerry_call_info_t *call_info_p,
-                                       const jerry_value_t args[],
-                                       const jerry_length_t args_count) {
-    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
-    if (obj == NULL) {
-        return jerry_undefined();
-    }
+static jerry_value_t js_lv_obj_get_map (const jerry_call_info_t *call_info_p,
+                                        const jerry_value_t args[],
+                                        const jerry_length_t args_count)
+{
+  JERRY_GET_NATIVE_PTR (lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+  if (obj == NULL)
+  {
+    return jerry_undefined ();
+  }
 
-    const char **map = lv_btnmatrix_get_map(obj);
-    if (map == NULL) {
-        return jerry_undefined();
-    }
+  const char **map = lv_btnmatrix_get_map (obj);
+  if (map == NULL)
+  {
+    return jerry_undefined ();
+  }
 
-    jerry_value_t js_array = jerry_array(args_count);
-    uint32_t index = 0;
+  uint32_t index = 0;
+  while (map[index] != NULL)
+  {
+    index++;
+  }
 
-    while (map[index] != NULL) {
-        jerry_value_t js_str = jerry_string_sz(map[index]);
-        jerry_object_set_indexed_property(js_array, index, js_str);
-        jerry_value_free(js_str);
-        index++;
-    }
+  jerry_value_t js_array = jerry_array (index);
+  for (uint32_t i = 0; i < index; i++)
+  {
+    jerry_value_t js_str = jerry_string_sz (map[i]);
+    jerry_object_set_index (js_array, i, js_str);
+    jerry_value_free (js_str);
+  }
 
-    return js_array;
+  return js_array;
 }
 
 static jerry_value_t js_lv_obj_get_selected_btn(const jerry_call_info_t *call_info_p,
@@ -377,7 +408,7 @@ static jerry_value_t js_lv_obj_get_selected_btn(const jerry_call_info_t *call_in
     return jerry_number(selected_btn);
 }
 
-static jerry_value_t js_lv_obj_get_btn_text(const jerry_call_info_p *call_info_p,
+static jerry_value_t js_lv_obj_get_btn_text(const jerry_call_info_t *call_info_p,
                                             const jerry_value_t args[],
                                             const jerry_length_t args_count) {
     if (args_count < 2 || !jerry_value_is_number(args[1])) {
@@ -396,7 +427,7 @@ static jerry_value_t js_lv_obj_get_btn_text(const jerry_call_info_p *call_info_p
         return jerry_undefined();
     }
 
-    return jerry_create_string((const jerry_char_t *)text);
+    return jerry_string_sz(text);
 }
 
 static jerry_value_t js_lv_obj_has_btn_ctrl(const jerry_call_info_t *call_info_p,
@@ -430,8 +461,6 @@ static jerry_value_t js_lv_obj_get_one_checked(const jerry_call_info_t *call_inf
     return jerry_boolean(checked);
 }
 
-#endif
-
 static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_count) {
@@ -460,7 +489,6 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
     {
         JERRYX_PROPERTY_FUNCTION ("align",           js_obj_align),
         JERRYX_PROPERTY_FUNCTION ("setSize",         js_lv_obj_set_size),
-#if 0
         JERRYX_PROPERTY_FUNCTION ("setMap",          js_lv_obj_set_map),
         JERRYX_PROPERTY_FUNCTION ("setCtrlMap",      js_lv_obj_set_ctrl_map),
         JERRYX_PROPERTY_FUNCTION ("setSelectedBtn",  js_lv_obj_set_selected_btn),
@@ -475,7 +503,6 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
         JERRYX_PROPERTY_FUNCTION ("getBtnText",      js_lv_obj_get_btn_text),
         JERRYX_PROPERTY_FUNCTION ("hasBtnCtrl",      js_lv_obj_has_btn_ctrl),
         JERRYX_PROPERTY_FUNCTION ("getOneChecked",   js_lv_obj_get_one_checked),
-#endif
         JERRYX_PROPERTY_FUNCTION ("onPress",         js_lv_obj_on_press),
         JERRYX_PROPERTY_LIST_END(),
     };
