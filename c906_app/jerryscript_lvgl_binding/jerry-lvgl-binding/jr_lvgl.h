@@ -18,9 +18,8 @@ typedef struct {
 } jerry_const_entry_t;
 
 typedef struct {
-    uint32_t value1;
-    uint32_t value2;
-    char     *name;
+    uint32_t map_len;
+    char   **map;
 } jerry_user_data_t;
 
 #define JERRY_CFUNC_ENTRY(cfunc, handler) {.cfunc_name = (const char *)cfunc, .cfunc_handler = handler}

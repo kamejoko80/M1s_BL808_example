@@ -32,6 +32,7 @@
 #include "js_lv_btn.h"
 #include "js_lv_arc.h"
 #include "js_lv_bar.h"
+#include "js_lv_btnmatrix.h"
 
 static void lvgl_task(void *param)
 {
@@ -44,6 +45,7 @@ static void lvgl_task(void *param)
 
 void jerryscript_lvgl_demo(void)
 {
+#if 0
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -74,7 +76,38 @@ void jerryscript_lvgl_demo(void)
         "let myBar = new Bar(screen);\n"
         "myBar.setSize(150, 20);\n"
         "myBar.align(LV_ALIGN_CENTER, 0, 0);\n"
-        "myBar.setValue(50, ANIM_ON);\n";
+        "myBar.setValue(50, ANIM_ON);\n"
+        "const btn_map = [\n"
+           "'1', '2', '3', '\\n',\n"
+           "'4', '5', '6', '\\n',\n"
+           "'7', '8', '9', '\\n',\n"
+           "'*', '0', '#', ''\n"
+        "];\n"
+        "let btnm = new BtnMatrix(screen);\n"
+        "btnm.setMap(btn_map);\n"
+        "btnm.setSize(100, 100);\n"
+        "btnm.align(LV_ALIGN_CENTER, 0, 0);";
+#else
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "const btn_map = [\n"
+           "'1', '2', '3','\\n',\n"
+           "'4', '5', '6','\\n',\n"
+           "'7', '8', '9','\\n',\n"
+           "'*', '0', '#',''\n"
+        "];\n"
+        "let btnm = new BtnMatrix(screen);\n"
+        "btnm.setMap(btn_map);\n"
+        "btnm.setSize(200, 150);\n"
+        "btnm.align(LV_ALIGN_CENTER, 0, 0);"
+        "btnm.onChanged(function(e){\n"
+            "print('Button clicked!');\n"
+            "const btn_id = btnm.getSelectedBtn();\n"
+            "const txt = btnm.getBtnText();\n"
+            "print('Button ' + txt + ' pressed');\n"            
+        "});\n";
+#endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
 
@@ -88,6 +121,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_btn_init();
     jr_lv_arc_init();
     jr_lv_bar_init();
+    jr_lv_btnmatrix_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
@@ -111,6 +145,37 @@ void jerryscript_lvgl_demo(void)
     //jerry_cleanup();
 }
 
+/* Event callback function */
+void btnm_event_cb(lv_event_t *e)
+{
+    lv_obj_t *btnm = lv_event_get_target(e);
+    uint16_t btn_id = lv_btnmatrix_get_selected_btn(btnm);
+    const char *txt = lv_btnmatrix_get_btn_text(btnm, btn_id);
+    printf("Button %s pressed\n", txt);
+}
+
+#if 0
+void create_button_matrix(void)
+{
+    static const char *btn_map[] = {
+        "1", "2", "3", "\n",
+        "4", "5", "6", "\n",
+        "7", "8", "9", "\n",
+        "*", "0", "#", ""
+    };
+
+
+    /* Create a button matrix */
+    lv_obj_t *btnm = lv_btnmatrix_create(lv_scr_act());
+    lv_btnmatrix_set_map(btnm, btn_map);
+    lv_obj_set_size(btnm, 200, 150);
+    lv_obj_center(btnm);
+
+    /* Add an event callback */
+    lv_obj_add_event_cb(btnm, btnm_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+}
+#endif
+
 void main()
 {
     lv_init();
@@ -120,6 +185,7 @@ void main()
     printf("Execute jerryscript demo\r\n");
 
     jerryscript_lvgl_demo();
+    //create_button_matrix();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);

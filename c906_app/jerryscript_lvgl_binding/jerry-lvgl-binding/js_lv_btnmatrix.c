@@ -80,13 +80,6 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
-    /* user data setting example */
-    //jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
-    //user_data->value1 = 1;
-    //user_data->value1 = 2;
-    //user_data->name = strdup("Some text");
-    //lv_obj_set_user_data(obj, user_data);
-
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
                                 obj                      /* void *native_pointer_p */
@@ -117,7 +110,6 @@ static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
 
     // Call LVGL function
     lv_obj_align(obj, align, x_ofs, y_ofs);
-
     return jerry_undefined();
 }
 
@@ -139,13 +131,12 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-static jerry_value_t js_lv_obj_set_map (const jerry_call_info_t *call_info_p,
-                                        const jerry_value_t args_p[],
-                                        const jerry_length_t args_count)
-{
-    if (args_count < 1 || !jerry_value_is_array (args_p[0]))
-    {
-        return jerry_throw_sz (JERRY_ERROR_TYPE, "Expected an array as the first argument");
+static jerry_value_t js_lv_obj_set_map(const jerry_call_info_t *call_info_p,
+                                       const jerry_value_t args_p[],
+                                       const jerry_length_t args_count) {
+    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
+    if (args_count < 1 || !jerry_value_is_array(args_p[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected an array as the first argument");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
@@ -153,46 +144,54 @@ static jerry_value_t js_lv_obj_set_map (const jerry_call_info_t *call_info_p,
         return jerry_undefined();
     }
 
-    uint32_t len = jerry_array_length (args_p[0]);
-    const char **map = malloc ((len + 1) * sizeof (char *));
-    if (map == NULL)
-    {
-        return jerry_throw_sz (JERRY_ERROR_TYPE, "Memory allocation failed");
+    uint32_t len = jerry_array_length(args_p[0]);
+    char **map = malloc((len + 1) * sizeof(char *));
+    if (map == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
     }
 
-    for (uint32_t i = 0; i < len; i++)
-    {
-        jerry_value_t item = jerry_object_get_index (args_p[0], i);
-        if (!jerry_value_is_string (item))
-        {
-        free (map);
-        return jerry_throw_sz (JERRY_ERROR_TYPE, "Expected strings in the array");
+    memset(map, 0, (len + 1) * sizeof(char *));
+
+    for (uint32_t i = 0; i < len; i++) {
+        jerry_value_t item = jerry_object_get_index(args_p[0], i);
+        if (!jerry_value_is_string(item)) {
+            printf("Expected strings in the array\n");
+            jerry_value_free(item);
+            goto free_map;
         }
 
-        jerry_size_t size = jerry_string_size (item, JERRY_ENCODING_UTF8);
-        char *str = malloc (size + 1);
-        if (str == NULL)
-        {
-        free (map);
-        return jerry_throw_sz (JERRY_ERROR_TYPE, "Memory allocation failed");
+        jerry_size_t size = jerry_string_size(item, JERRY_ENCODING_UTF8);
+        char *str = malloc(size + 1);
+        if (str == NULL) {
+            printf("Memory allocation failed\n");
+            jerry_value_free(item);
+            goto free_map;
         }
 
-        jerry_string_to_buffer (item, JERRY_ENCODING_UTF8, (jerry_char_t *)str, size);
+        jerry_string_to_buffer(item, JERRY_ENCODING_UTF8, (jerry_char_t *)str, size);
         str[size] = '\0';
         map[i] = str;
-        jerry_value_free (item);
+        jerry_value_free(item);
     }
     map[len] = NULL;
+    lv_btnmatrix_set_map(obj, (const char **)map);
 
-    lv_btnmatrix_set_map (obj, map);
+    /* save user data */
+    jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
+    user_data->map_len = len;
+    user_data->map = map;
+    lv_obj_set_user_data(obj, user_data);
 
-    for (uint32_t i = 0; i < len; i++)
-    {
-        free ((void *)map[i]);
+    return jerry_undefined();
+
+free_map:
+    for (uint32_t i = 0; i < len; i++) {
+        if (map[i] != NULL) {
+            free((void *)map[i]);
+        }
     }
-    free (map);
-
-    return jerry_undefined ();
+    free(map);
+    return jerry_undefined();
 }
 
 static jerry_value_t js_lv_obj_set_ctrl_map(const jerry_call_info_t *call_info_p,
@@ -399,6 +398,7 @@ static jerry_value_t js_lv_obj_get_map (const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_get_selected_btn(const jerry_call_info_t *call_info_p,
                                                 const jerry_value_t args[],
                                                 const jerry_length_t args_count) {
+    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
@@ -411,6 +411,7 @@ static jerry_value_t js_lv_obj_get_selected_btn(const jerry_call_info_t *call_in
 static jerry_value_t js_lv_obj_get_btn_text(const jerry_call_info_t *call_info_p,
                                             const jerry_value_t args[],
                                             const jerry_length_t args_count) {
+    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 2 || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (btn_id)");
     }
@@ -461,7 +462,7 @@ static jerry_value_t js_lv_obj_get_one_checked(const jerry_call_info_t *call_inf
     return jerry_boolean(checked);
 }
 
-static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
+static jerry_value_t js_lv_obj_on_changed(const jerry_call_info_t *call_info_p,
                                         const jerry_value_t args[],
                                         const jerry_length_t args_count) {
     if (args_count < 1 || !jerry_value_is_function(args[0])) {
@@ -474,7 +475,7 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
     }
 
     // Register the event callback
-    lv_obj_add_event_cb(obj, js_lv_obj_event_cb, LV_EVENT_CLICKED, (void *)(uintptr_t)args[0]);
+    lv_obj_add_event_cb(obj, js_lv_obj_event_cb, LV_EVENT_VALUE_CHANGED, (void *)(uintptr_t)args[0]);
 
     return jerry_undefined();
 }
@@ -503,7 +504,7 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
         JERRYX_PROPERTY_FUNCTION ("getBtnText",      js_lv_obj_get_btn_text),
         JERRYX_PROPERTY_FUNCTION ("hasBtnCtrl",      js_lv_obj_has_btn_ctrl),
         JERRYX_PROPERTY_FUNCTION ("getOneChecked",   js_lv_obj_get_one_checked),
-        JERRYX_PROPERTY_FUNCTION ("onPress",         js_lv_obj_on_press),
+        JERRYX_PROPERTY_FUNCTION ("onChanged",       js_lv_obj_on_changed),
         JERRYX_PROPERTY_LIST_END(),
     };
 

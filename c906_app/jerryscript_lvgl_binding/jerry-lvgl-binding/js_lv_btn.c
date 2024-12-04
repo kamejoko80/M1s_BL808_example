@@ -81,11 +81,11 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
     }
 
     /* user data setting example */
-    jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
+/*  jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
     user_data->value1 = 1;
     user_data->value1 = 2;
     user_data->name = strdup("Some text");
-    lv_obj_set_user_data(obj, user_data);
+    lv_obj_set_user_data(obj, user_data); */
       
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
