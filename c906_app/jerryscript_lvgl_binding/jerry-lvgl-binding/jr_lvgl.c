@@ -1,7 +1,3 @@
-/*
- * Reference: https://github.com/lee88688/jerryscript-lvgl-binding
- */
-
 #include <stdio.h>
 #include "jr_lvgl.h"
 #include "jerryscript-ext/handlers.h"

@@ -33,6 +33,7 @@
 #include "js_lv_arc.h"
 #include "js_lv_bar.h"
 #include "js_lv_btnmatrix.h"
+#include "js_lv_canvas.h"
 
 static void lvgl_task(void *param)
 {
@@ -117,6 +118,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_arc_init();
     jr_lv_bar_init();
     jr_lv_btnmatrix_init();
+    jr_lv_canvas_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
