@@ -98,9 +98,9 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
 * Protperties, methodes definition
 *************************************************************************/
 
-static jerry_value_t js_obj_align(const jerry_call_info_t *call_info_p,
-                                  const jerry_value_t args[],
-                                  const jerry_length_t args_count) {
+static jerry_value_t js_lv_obj_align(const jerry_call_info_t *call_info_p,
+                                     const jerry_value_t args[],
+                                     const jerry_length_t args_count) {
     // Ensure at least 3 arguments: align, x_ofs, y_ofs
     if (args_count < 3) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Insufficient arguments");
@@ -165,7 +165,7 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
 
     jerryx_property_entry methods[] =
     {
-        JERRYX_PROPERTY_FUNCTION ("align",   js_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("align",   js_lv_obj_align),
         JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
         JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_obj_on_press),
         JERRYX_PROPERTY_LIST_END(),
