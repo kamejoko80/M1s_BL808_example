@@ -36,6 +36,15 @@
 #define LV_OBJ_CREATE(parent) lv_canvas_create(parent)
 
 /************************************************************************
+* Typedef
+*************************************************************************/
+
+typedef struct {
+    void   *buf;
+} jerry_lv_user_data_t;
+
+
+/************************************************************************
 * Native event handler for LVGL
 *************************************************************************/
 
@@ -56,10 +65,20 @@ static void js_lv_obj_event_cb(lv_event_t *e) {
 * Constructor & Desctructor
 *************************************************************************/
 
+static void js_lv_clear_user_data_cb(lv_obj_t *obj) {
+
+    jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
+    if (user_data != NULL) {
+
+        free(user_data);
+        lv_obj_set_user_data(obj, NULL);
+    }
+}
+
 static void js_lv_obj_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
     printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
-    lv_obj_t *btn = (lv_obj_t *) native_p;
-    jr_lvgl_obj_desctruct(btn);
+    lv_obj_t *obj = (lv_obj_t *) native_p;
+    jr_lvgl_obj_desctruct(obj, &js_lv_clear_user_data_cb);
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
@@ -79,6 +98,10 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
     if (obj == NULL) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
+
+    /* user data settings */
+    jerry_lv_user_data_t *user_data = malloc(sizeof(jerry_lv_user_data_t));
+    lv_obj_set_user_data(obj, user_data);
 
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
@@ -153,7 +176,6 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
                                           const jerry_value_t args[],
                                           const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 4 || !jerry_value_is_object(args[0]) || !jerry_value_is_number(args[1]) ||
         !jerry_value_is_number(args[2]) || !jerry_value_is_number(args[3])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (buf, w, h, cf)");
@@ -165,10 +187,26 @@ static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
     }
 
     jerry_value_t buf_arg = args[0];
-    JERRY_GET_NATIVE_PTR(void, buf, buf_arg, &jerry_obj_native_info);
+    jerry_length_t buf_size = jerry_arraybuffer_size(buf_arg);
+
+    void *buf = malloc(buf_size);
     if (buf == NULL) {
         printf("%s %s error buffer\n", LV_OBJ_NAME, __FUNCTION__);
-        return jerry_undefined();
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
+    }
+
+    /* Read the ArrayBuffer content into the allocated memory */
+    jerry_length_t written = jerry_arraybuffer_write(buf_arg, 0, buf, buf_size);
+    if (written != buf_size) {
+        printf("%s %s buffer written failed\n", LV_OBJ_NAME, __FUNCTION__);
+        free(buf);
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to read ArrayBuffer");
+    }
+
+    /* store buffer pointer into user data */
+    jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
+    if(user_data != NULL){
+        user_data->buf = buf;
     }
 
     lv_coord_t w = (lv_coord_t)jerry_value_as_number(args[1]);
@@ -176,6 +214,7 @@ static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
     lv_img_cf_t cf = (lv_img_cf_t)jerry_value_as_number(args[3]);
 
     lv_canvas_set_buffer(obj, buf, w, h, cf);
+
     return jerry_undefined();
 }
 

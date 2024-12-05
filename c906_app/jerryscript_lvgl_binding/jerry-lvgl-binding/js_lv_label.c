@@ -31,8 +31,18 @@
 #include "js_lv_label.h"
 #include "jerryscript-ext/handlers.h"
 #include "jerryscript-ext/properties.h"
+ 
+#define LV_OBJ_NAME           "Label"
+#define LV_OBJ_CREATE(parent) lv_label_create(parent)
 
-#define LV_OBJ_NAME "Label"
+/************************************************************************
+* Typedef
+*************************************************************************/
+
+typedef struct {
+    uint32_t value;
+    char     *name;
+} jerry_lv_user_data_t;
 
 #if 0 /* Jerryscript lvgl native binding functions (one by one) */
 static jerry_value_t js_lv_obj_align(const jerry_call_info_t *call_info_p,
@@ -403,10 +413,22 @@ static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
 * Constructor & Desctructor
 *************************************************************************/
 
+static void js_lv_clear_user_data_cb(lv_obj_t *obj) {
+
+    jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
+    if (user_data != NULL) {
+        if (user_data->name != NULL) {
+            free(user_data->name);
+        }
+        free(user_data);
+        lv_obj_set_user_data(obj, NULL);
+    }
+}
+
 static void js_lv_label_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
-    printf("js_lv_label_destructor_cb\n");
-    lv_obj_t *label = (lv_obj_t *) native_p;
-    jr_lvgl_obj_desctruct(label);
+    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
+    lv_obj_t *obj = (lv_obj_t *) native_p;
+    jr_lvgl_obj_desctruct(obj, &js_lv_clear_user_data_cb);
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
@@ -416,13 +438,13 @@ static jerry_object_native_info_t jerry_obj_native_info = {
 static jerry_value_t js_lv_label_constructor(const jerry_call_info_t *call_info_p,
                                              const jerry_value_t args[],
                                              const jerry_length_t args_count) {
-    printf("js_lv_label_constructor\n");
+    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_object(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid arguments. Expected object .");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, parent, args[0], NULL);
-    lv_obj_t *label = lv_label_create(parent);
+    lv_obj_t *label = LV_OBJ_CREATE(parent);
     if (label == NULL) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create label");
     }

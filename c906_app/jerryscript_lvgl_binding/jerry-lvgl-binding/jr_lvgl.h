@@ -22,6 +22,8 @@ typedef struct {
     char   **map;
 } jerry_user_data_t;
 
+typedef void (*jr_clear_user_data_cb_t)(lv_obj_t *obj);
+
 #define JERRY_CFUNC_ENTRY(cfunc, handler) {.cfunc_name = (const char *)cfunc, .cfunc_handler = handler}
 #define JERRY_CFUNC_LIST_END()            {.cfunc_name = NULL, .cfunc_handler = 0}
 
@@ -33,7 +35,7 @@ typedef struct {
     native_prt = (native_type *)jr_get_lvgl_object(js_ptr, native_info_ptr);   \
 
 void jr_set_prop_list(jerry_value_t prop_obj, jerryx_property_entry *methods);
-void jr_lvgl_obj_desctruct(lv_obj_t *obj);
+void jr_lvgl_obj_desctruct(lv_obj_t *obj, jr_clear_user_data_cb_t callback);
 void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries);
 void jr_register_global_constant_list(jerry_value_t global_obj, const jerry_const_entry_t *entries);
 void *jr_get_lvgl_object(const jerry_value_t js_obj, const jerry_object_native_info_t *native_info_p);

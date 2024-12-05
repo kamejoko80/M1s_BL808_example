@@ -34,27 +34,12 @@ void jr_lvgl_detach_children(lv_obj_t *parent) {
     }
 }
 
-void jr_lvgl_obj_clear_user_data(lv_obj_t *obj) {
-
-    jerry_user_data_t *user_data = (jerry_user_data_t *)lv_obj_get_user_data(obj);
-    if (user_data != NULL) {
-        if (user_data->map != NULL) {
-            for (uint32_t i = 0; i < user_data->map_len; i++) {
-                if (user_data->map[i] != NULL) {
-                    free((void *)user_data->map[i]);
-                }
-            }
-            free(user_data->map);
-        }
-        free(user_data);
-        lv_obj_set_user_data(obj, NULL);
-    }
-}
-
-void jr_lvgl_obj_desctruct(lv_obj_t *obj) {
+void jr_lvgl_obj_desctruct(lv_obj_t *obj, jr_clear_user_data_cb_t callback) {
     if(obj) {
         jr_lvgl_detach_children(obj);
-        jr_lvgl_obj_clear_user_data(obj);
+        if(callback) {
+            callback(obj);
+        }
         lv_obj_del(obj);
     }
 }

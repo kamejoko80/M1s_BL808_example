@@ -36,6 +36,15 @@
 #define LV_OBJ_CREATE(parent) lv_bar_create(parent)
 
 /************************************************************************
+* Typedef
+*************************************************************************/
+
+typedef struct {
+    uint32_t value;
+    char     *name;
+} jerry_lv_user_data_t;
+
+/************************************************************************
 * Native event handler for LVGL
 *************************************************************************/
 
@@ -56,10 +65,22 @@ static void js_lv_obj_event_cb(lv_event_t *e) {
 * Constructor & Desctructor
 *************************************************************************/
 
+static void js_lv_clear_user_data_cb(lv_obj_t *obj) {
+
+    jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
+    if (user_data != NULL) {
+        if (user_data->name != NULL) {
+            free(user_data->name);
+        }
+        free(user_data);
+        lv_obj_set_user_data(obj, NULL);
+    }
+}
+
 static void js_lv_obj_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
     printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
-    lv_obj_t *btn = (lv_obj_t *) native_p;
-    jr_lvgl_obj_desctruct(btn);
+    lv_obj_t *obj = (lv_obj_t *) native_p;
+    jr_lvgl_obj_desctruct(obj, &js_lv_clear_user_data_cb);
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
@@ -79,13 +100,6 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
     if (obj == NULL) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
-
-    /* user data setting example */
-    //jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
-    //user_data->value1 = 1;
-    //user_data->value1 = 2;
-    //user_data->name = strdup("Some text");
-    //lv_obj_set_user_data(obj, user_data);
       
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */

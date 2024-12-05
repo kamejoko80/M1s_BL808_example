@@ -46,23 +46,36 @@ static void lvgl_task(void *param)
 
 void jerryscript_lvgl_demo(void)
 {
-#if 0
+
+#if 0 /* Test lable */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
         "const myLabel = new Label(screen);\n"
         "myLabel.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myLabel.setText('Hello LVGL!');\n"
-        "print(myLabel.getText());\n"
-        "const myButton = new Button(screen);\n"
-        "myButton.align(LV_ALIGN_BOTTOM_MID, 0, 0);\n"
+        "print(myLabel.getText());\n";
+#endif
+
+#if 0 /* Test button */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let myButton = new Button(screen);\n"
+        "myButton.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myButton.setSize(60, 60);\n"
         "myButton.onPress(function(event_code){\n"
         "if (event_code === 7) {\n"
         "print('Button clicked!');\n"
-        "}});\n"
+        "}});\n";
+#endif
+
+#if 0 /* Test arc */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
         "let myArc = new Arc(screen);\n"
-        "myButton.setSize(50, 50);\n"
+        "myArc.setSize(200, 200);\n"
         "myArc.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myArc.setRange(0, 100);\n"
         "myArc.setStartAngle(45);\n"
@@ -73,12 +86,20 @@ void jerryscript_lvgl_demo(void)
         "myArc.setRotation(90);\n"
         "myArc.setMode(LV_ARC_MODE_REVERSE);\n"
         "myArc.setValue(50);\n"
-        "myArc.alignObjToAngle(myLabel, 50);\n"
+        "myArc.alignObjToAngle(myLabel, 50);\n";
+#endif
+
+#if 0 /* Test bar */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
         "let myBar = new Bar(screen);\n"
         "myBar.setSize(150, 20);\n"
         "myBar.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myBar.setValue(50, ANIM_ON);";
-#else
+#endif
+
+#if 0 /* Test button matrix */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -103,6 +124,18 @@ void jerryscript_lvgl_demo(void)
                 "print(`Button ${i}: ${btnMapArray[i]}`);\n"
             "}\n"
         "}\n";
+#endif
+
+#if 1 /* Test canvas */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let cv = new Canvas(screen);\n"
+        "cv.setSize(200, 200);\n"
+        "cv.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "let buf = new ArrayBuffer(200 * 200 * 2);\n"
+        "cv.setBuffer(buf, 200, 200, LV_IMG_CF_RGB565);\n"
+        "cv.fillBg(0x001F, 255);\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;

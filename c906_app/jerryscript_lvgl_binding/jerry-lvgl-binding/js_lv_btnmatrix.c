@@ -36,6 +36,15 @@
 #define LV_OBJ_CREATE(parent) lv_btnmatrix_create(parent)
 
 /************************************************************************
+* Typedef
+*************************************************************************/
+
+typedef struct {
+    uint32_t map_len;
+    char   **map;
+} jerry_lv_user_data_t;
+
+/************************************************************************
 * Native event handler for LVGL
 *************************************************************************/
 
@@ -56,10 +65,27 @@ static void js_lv_obj_event_cb(lv_event_t *e) {
 * Constructor & Desctructor
 *************************************************************************/
 
+static void js_lv_clear_user_data_cb(lv_obj_t *obj) {
+
+    jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
+    if (user_data != NULL) {
+        if (user_data->map != NULL) {
+            for (uint32_t i = 0; i < user_data->map_len; i++) {
+                if (user_data->map[i] != NULL) {
+                    free((void *)user_data->map[i]);
+                }
+            }
+            free(user_data->map);
+        }
+        free(user_data);
+        lv_obj_set_user_data(obj, NULL);
+    }
+}
+
 static void js_lv_obj_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p) {
     printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
-    lv_obj_t *btn = (lv_obj_t *) native_p;
-    jr_lvgl_obj_desctruct(btn);
+    lv_obj_t *obj = (lv_obj_t *) native_p;
+    jr_lvgl_obj_desctruct(obj, &js_lv_clear_user_data_cb);
 }
 
 static jerry_object_native_info_t jerry_obj_native_info = {
@@ -176,7 +202,7 @@ static jerry_value_t js_lv_obj_set_map(const jerry_call_info_t *call_info_p,
     lv_btnmatrix_set_map(obj, (const char **)map);
 
     /* save user data */
-    jerry_user_data_t *user_data = malloc(sizeof(jerry_user_data_t));
+    jerry_lv_user_data_t *user_data = malloc(sizeof(jerry_lv_user_data_t));
     user_data->map_len = len;
     user_data->map = map;
     lv_obj_set_user_data(obj, user_data);
