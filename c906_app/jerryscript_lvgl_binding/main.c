@@ -95,7 +95,13 @@ void jerryscript_lvgl_demo(void)
             "const btn_id = btnm.getSelectedBtn();\n"
             "const txt = btnm.getBtnText(btn_id);\n"
             "print('Button ' + txt + ' pressed');\n"
-        "});\n";
+        "});\n"
+        "const btnMapArray = btnm.getMap();\n"
+        "if (Array.isArray(btnMapArray)) {\n"
+            "for (let i = 0; i < btnMapArray.length; i++) {\n"
+                "print(`Button ${i}: ${btnMapArray[i]}`);\n"
+            "}\n"
+        "}\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
