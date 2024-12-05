@@ -76,17 +76,7 @@ void jerryscript_lvgl_demo(void)
         "let myBar = new Bar(screen);\n"
         "myBar.setSize(150, 20);\n"
         "myBar.align(LV_ALIGN_CENTER, 0, 0);\n"
-        "myBar.setValue(50, ANIM_ON);\n"
-        "const btn_map = [\n"
-           "'1', '2', '3', '\\n',\n"
-           "'4', '5', '6', '\\n',\n"
-           "'7', '8', '9', '\\n',\n"
-           "'*', '0', '#', ''\n"
-        "];\n"
-        "let btnm = new BtnMatrix(screen);\n"
-        "btnm.setMap(btn_map);\n"
-        "btnm.setSize(100, 100);\n"
-        "btnm.align(LV_ALIGN_CENTER, 0, 0);";
+        "myBar.setValue(50, ANIM_ON);";
 #else
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
@@ -99,13 +89,12 @@ void jerryscript_lvgl_demo(void)
         "];\n"
         "let btnm = new BtnMatrix(screen);\n"
         "btnm.setMap(btn_map);\n"
-        "btnm.setSize(200, 150);\n"
+        "btnm.setSize(250, 170);\n"
         "btnm.align(LV_ALIGN_CENTER, 0, 0);"
         "btnm.onChanged(function(e){\n"
-            "print('Button clicked!');\n"
             "const btn_id = btnm.getSelectedBtn();\n"
-            "const txt = btnm.getBtnText();\n"
-            "print('Button ' + txt + ' pressed');\n"            
+            "const txt = btnm.getBtnText(btn_id);\n"
+            "print('Button ' + txt + ' pressed');\n"
         "});\n";
 #endif
 

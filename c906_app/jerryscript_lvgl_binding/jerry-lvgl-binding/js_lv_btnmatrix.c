@@ -398,7 +398,6 @@ static jerry_value_t js_lv_obj_get_map (const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_get_selected_btn(const jerry_call_info_t *call_info_p,
                                                 const jerry_value_t args[],
                                                 const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_undefined();
@@ -411,8 +410,7 @@ static jerry_value_t js_lv_obj_get_selected_btn(const jerry_call_info_t *call_in
 static jerry_value_t js_lv_obj_get_btn_text(const jerry_call_info_t *call_info_p,
                                             const jerry_value_t args[],
                                             const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
-    if (args_count < 2 || !jerry_value_is_number(args[1])) {
+    if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (btn_id)");
     }
 
@@ -421,7 +419,7 @@ static jerry_value_t js_lv_obj_get_btn_text(const jerry_call_info_t *call_info_p
         return jerry_undefined();
     }
 
-    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[1]);
+    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[0]);
     const char *text = lv_btnmatrix_get_btn_text(obj, btn_id);
 
     if (text == NULL) {
