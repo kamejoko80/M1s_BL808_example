@@ -134,7 +134,6 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_map(const jerry_call_info_t *call_info_p,
                                        const jerry_value_t args_p[],
                                        const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);
     if (args_count < 1 || !jerry_value_is_array(args_p[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected an array as the first argument");
     }
@@ -197,7 +196,7 @@ free_map:
 static jerry_value_t js_lv_obj_set_ctrl_map(const jerry_call_info_t *call_info_p,
                                             const jerry_value_t args[],
                                             const jerry_length_t args_count) {
-    if (args_count < 2 || !jerry_value_is_array(args[1])) {
+    if (args_count < 1 || !jerry_value_is_array(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (ctrl_map)");
     }
 
@@ -206,14 +205,14 @@ static jerry_value_t js_lv_obj_set_ctrl_map(const jerry_call_info_t *call_info_p
         return jerry_undefined();
     }
 
-    uint32_t len = jerry_array_length(args[1]);
+    uint32_t len = jerry_array_length(args[0]);
     lv_btnmatrix_ctrl_t *ctrl_map = malloc(len * sizeof(lv_btnmatrix_ctrl_t));
     if (ctrl_map == NULL) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
     }
 
     for (uint32_t i = 0; i < len; i++) {
-        jerry_value_t item = jerry_object_get_index(args[1], i);
+        jerry_value_t item = jerry_object_get_index(args[0], i);
         if (!jerry_value_is_number(item)) {
             free(ctrl_map);
             return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected numbers in ctrl_map");
@@ -230,7 +229,7 @@ static jerry_value_t js_lv_obj_set_ctrl_map(const jerry_call_info_t *call_info_p
 static jerry_value_t js_lv_obj_set_selected_btn(const jerry_call_info_t *call_info_p,
                                                 const jerry_value_t args[],
                                                 const jerry_length_t args_count) {
-    if (args_count < 2 || !jerry_value_is_number(args[1])) {
+    if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (btn_id)");
     }
 
@@ -239,7 +238,7 @@ static jerry_value_t js_lv_obj_set_selected_btn(const jerry_call_info_t *call_in
         return jerry_undefined();
     }
 
-    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[1]);
+    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[0]);
     lv_btnmatrix_set_selected_btn(obj, btn_id);
 
     return jerry_undefined();
@@ -248,7 +247,7 @@ static jerry_value_t js_lv_obj_set_selected_btn(const jerry_call_info_t *call_in
 static jerry_value_t js_lv_obj_set_btn_ctrl(const jerry_call_info_t *call_info_p,
                                             const jerry_value_t args[],
                                             const jerry_length_t args_count) {
-    if (args_count < 3 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+    if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (btn_id, ctrl)");
     }
 
@@ -257,8 +256,8 @@ static jerry_value_t js_lv_obj_set_btn_ctrl(const jerry_call_info_t *call_info_p
         return jerry_undefined();
     }
 
-    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[1]);
-    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[2]);
+    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[0]);
+    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[1]);
 
     lv_btnmatrix_set_btn_ctrl(obj, btn_id, ctrl);
 
@@ -268,7 +267,7 @@ static jerry_value_t js_lv_obj_set_btn_ctrl(const jerry_call_info_t *call_info_p
 static jerry_value_t js_lv_obj_clear_btn_ctrl(const jerry_call_info_t *call_info_p,
                                               const jerry_value_t args[],
                                               const jerry_length_t args_count) {
-    if (args_count < 3 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+    if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (btn_id, ctrl)");
     }
 
@@ -277,8 +276,8 @@ static jerry_value_t js_lv_obj_clear_btn_ctrl(const jerry_call_info_t *call_info
         return jerry_undefined();
     }
 
-    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[1]);
-    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[2]);
+    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[0]);
+    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[1]);
 
     lv_btnmatrix_clear_btn_ctrl(obj, btn_id, ctrl);
 
@@ -288,7 +287,7 @@ static jerry_value_t js_lv_obj_clear_btn_ctrl(const jerry_call_info_t *call_info
 static jerry_value_t js_lv_obj_set_btn_ctrl_all(const jerry_call_info_t *call_info_p,
                                                 const jerry_value_t args[],
                                                 const jerry_length_t args_count) {
-    if (args_count < 2 || !jerry_value_is_number(args[1])) {
+    if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (ctrl)");
     }
 
@@ -297,7 +296,7 @@ static jerry_value_t js_lv_obj_set_btn_ctrl_all(const jerry_call_info_t *call_in
         return jerry_undefined();
     }
 
-    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[1]);
+    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[0]);
 
     lv_btnmatrix_set_btn_ctrl_all(obj, ctrl);
 
@@ -307,7 +306,7 @@ static jerry_value_t js_lv_obj_set_btn_ctrl_all(const jerry_call_info_t *call_in
 static jerry_value_t js_lv_obj_clear_btn_ctrl_all(const jerry_call_info_t *call_info_p,
                                                   const jerry_value_t args[],
                                                   const jerry_length_t args_count) {
-    if (args_count < 2 || !jerry_value_is_number(args[1])) {
+    if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (ctrl)");
     }
 
@@ -316,7 +315,7 @@ static jerry_value_t js_lv_obj_clear_btn_ctrl_all(const jerry_call_info_t *call_
         return jerry_undefined();
     }
 
-    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[1]);
+    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[0]);
 
     lv_btnmatrix_clear_btn_ctrl_all(obj, ctrl);
 
@@ -326,7 +325,7 @@ static jerry_value_t js_lv_obj_clear_btn_ctrl_all(const jerry_call_info_t *call_
 static jerry_value_t js_lv_obj_set_btn_width(const jerry_call_info_t *call_info_p,
                                              const jerry_value_t args[],
                                              const jerry_length_t args_count) {
-    if (args_count < 3 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+    if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (btn_id, width)");
     }
 
@@ -335,8 +334,8 @@ static jerry_value_t js_lv_obj_set_btn_width(const jerry_call_info_t *call_info_
         return jerry_undefined();
     }
 
-    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[1]);
-    uint8_t width = (uint8_t)jerry_value_as_number(args[2]);
+    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[0]);
+    uint8_t width = (uint8_t)jerry_value_as_number(args[1]);
 
     lv_btnmatrix_set_btn_width(obj, btn_id, width);
 
@@ -346,7 +345,7 @@ static jerry_value_t js_lv_obj_set_btn_width(const jerry_call_info_t *call_info_
 static jerry_value_t js_lv_obj_set_one_checked(const jerry_call_info_t *call_info_p,
                                                const jerry_value_t args[],
                                                const jerry_length_t args_count) {
-    if (args_count < 2 || !jerry_value_is_boolean(args[1])) {
+    if (args_count < 1 || !jerry_value_is_boolean(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (en)");
     }
 
@@ -355,7 +354,7 @@ static jerry_value_t js_lv_obj_set_one_checked(const jerry_call_info_t *call_inf
         return jerry_undefined();
     }
 
-    bool en = jerry_value_is_true(args[1]);
+    bool en = jerry_value_is_true(args[0]);
 
     lv_btnmatrix_set_one_checked(obj, en);
 
@@ -432,7 +431,7 @@ static jerry_value_t js_lv_obj_get_btn_text(const jerry_call_info_t *call_info_p
 static jerry_value_t js_lv_obj_has_btn_ctrl(const jerry_call_info_t *call_info_p,
                                             const jerry_value_t args[],
                                             const jerry_length_t args_count) {
-    if (args_count < 3 || !jerry_value_is_number(args[1]) || !jerry_value_is_number(args[2])) {
+    if (args_count < 2 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (btn_id, ctrl)");
     }
 
@@ -441,8 +440,8 @@ static jerry_value_t js_lv_obj_has_btn_ctrl(const jerry_call_info_t *call_info_p
         return jerry_undefined();
     }
 
-    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[1]);
-    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[2]);
+    uint16_t btn_id = (uint16_t)jerry_value_as_number(args[0]);
+    lv_btnmatrix_ctrl_t ctrl = (lv_btnmatrix_ctrl_t)jerry_value_as_number(args[1]);
 
     bool has_ctrl = lv_btnmatrix_has_btn_ctrl(obj, btn_id, ctrl);
     return jerry_boolean(has_ctrl);
