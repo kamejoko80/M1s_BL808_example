@@ -133,8 +133,8 @@ void jerryscript_lvgl_demo(void)
         "let cv = new Canvas(screen);\n"
         "cv.setSize(200, 200);\n"
         "cv.align(LV_ALIGN_CENTER, 0, 0);\n"
-        "let buf = new ArrayBuffer(200 * 200 * 2);\n"
-        "cv.setBuffer(buf, 200, 200, LV_IMG_CF_RGB565);\n"
+        "const buf_size = (200 * 200 * 2);\n"
+        "cv.setBuffer(buf_size, 200, 200, LV_IMG_CF_RGB565);\n"
         "cv.fillBg(0x001F, 255);\n";
 #endif
 

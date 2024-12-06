@@ -176,7 +176,7 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
                                           const jerry_value_t args[],
                                           const jerry_length_t args_count) {
-    if (args_count < 4 || !jerry_value_is_object(args[0]) || !jerry_value_is_number(args[1]) ||
+    if (args_count < 4 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1]) ||
         !jerry_value_is_number(args[2]) || !jerry_value_is_number(args[3])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (buf, w, h, cf)");
     }
@@ -186,8 +186,7 @@ static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
         return jerry_undefined();
     }
 
-    jerry_value_t buf_arg = args[0];
-    jerry_length_t buf_size = jerry_arraybuffer_size(buf_arg);
+    jerry_length_t buf_size = jerry_value_as_number(args[0]);
 
     void *buf = malloc(buf_size);
     if (buf == NULL) {
@@ -195,13 +194,7 @@ static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
     }
 
-    /* Read the ArrayBuffer content into the allocated memory */
-    jerry_length_t written = jerry_arraybuffer_write(buf_arg, 0, buf, buf_size);
-    if (written != buf_size) {
-        printf("%s %s buffer written failed\n", LV_OBJ_NAME, __FUNCTION__);
-        free(buf);
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to read ArrayBuffer");
-    }
+    memset(buf, 0, buf_size);
 
     /* store buffer pointer into user data */
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
