@@ -151,6 +151,17 @@ static const jerry_const_entry_t jerry_constant_entry_list[] = {
     JERRY_CONST_ENTRY("LV_OPA_90",                         LV_OPA_90                        ),
     JERRY_CONST_ENTRY("LV_OPA_100",                        LV_OPA_100                       ),
     JERRY_CONST_ENTRY("LV_OPA_COVER",                      LV_OPA_COVER                     ),
+    JERRY_CONST_ENTRY("LV_TEXT_FLAG_NONE",                 LV_TEXT_FLAG_NONE                ),   
+    JERRY_CONST_ENTRY("LV_TEXT_FLAG_RECOLOR",              LV_TEXT_FLAG_RECOLOR             ),
+    JERRY_CONST_ENTRY("LV_TEXT_FLAG_EXPAND",               LV_TEXT_FLAG_EXPAND              ),
+    JERRY_CONST_ENTRY("LV_TEXT_FLAG_FIT",                  LV_TEXT_FLAG_FIT                 ),
+    JERRY_CONST_ENTRY("LV_TEXT_CMD_STATE_WAIT",            LV_TEXT_CMD_STATE_WAIT           ),
+    JERRY_CONST_ENTRY("LV_TEXT_CMD_STATE_PAR",             LV_TEXT_CMD_STATE_PAR            ),
+    JERRY_CONST_ENTRY("LV_TEXT_CMD_STATE_IN",              LV_TEXT_CMD_STATE_IN             ),
+    JERRY_CONST_ENTRY("LV_TEXT_ALIGN_AUTO",                LV_TEXT_ALIGN_AUTO               ),
+    JERRY_CONST_ENTRY("LV_TEXT_ALIGN_LEFT",                LV_TEXT_ALIGN_LEFT               ),
+    JERRY_CONST_ENTRY("LV_TEXT_ALIGN_CENTER",              LV_TEXT_ALIGN_CENTER             ),
+    JERRY_CONST_ENTRY("LV_TEXT_ALIGN_RIGHT",               LV_TEXT_ALIGN_RIGHT              ),
     JERRY_CONST_LIST_END(),
 };
 

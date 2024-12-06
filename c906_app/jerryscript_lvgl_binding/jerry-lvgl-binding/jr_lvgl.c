@@ -10,7 +10,7 @@ typedef struct _lv_event_dsc_t {
     lv_event_code_t filter : 8;
 } lv_event_dsc_t;
 
-lv_color_t jr_lvgl_convert_color_t(uint32_t color) {
+lv_color_t jr_lvgl_color_to_color_t(uint32_t color) {
     lv_color_t lv_color;
 #if LV_COLOR_DEPTH == 32
     // Assuming color is 0xAARRGGBB, extract ARGB8888 components
@@ -51,6 +51,10 @@ lv_color_t jr_lvgl_convert_color_t(uint32_t color) {
     // printf("color b:    %x\n", lv_color.ch.blue);
     // printf("color full: %x\n", lv_color.full);
     return lv_color;
+}
+
+uint32_t jr_lvgl_color_t_to_color(lv_color_t color) {
+    return color.full;   
 }
 
 /* This function allocates memory, please free the text pointer after using it */
