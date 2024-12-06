@@ -40,5 +40,6 @@ void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries);
 void jr_register_global_constant_list(jerry_value_t global_obj, const jerry_const_entry_t *entries);
 void *jr_get_lvgl_object(const jerry_value_t js_obj, const jerry_object_native_info_t *native_info_p);
 char *jr_get_string(jerry_value_t value);
+lv_color_t jr_lvgl_convert_color_t(uint32_t color);
 
 #endif /* !JR_LVGL_H */

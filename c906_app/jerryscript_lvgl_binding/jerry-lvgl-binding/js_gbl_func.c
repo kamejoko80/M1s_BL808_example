@@ -40,31 +40,27 @@ static jerry_value_t js_lv_scr_act(const jerry_call_info_t *call_info_p,
     return js_screen;
 }
 
-static jerry_value_t js_lv_event_get_target(const jerry_call_info_t *call_info_p,
-                                            const jerry_value_t args_p[],
-                                            const jerry_length_t args_count) {
-    if (args_count < 1 || !jerry_value_is_object(args_p[0])) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected an event object as the first argument");
+static jerry_value_t js_lv_color_make(const jerry_call_info_t *call_info_p,
+                                      const jerry_value_t args[],
+                                      const jerry_length_t args_count) {
+    if (args_count < 3 ||
+        !jerry_value_is_number(args[0]) ||
+        !jerry_value_is_number(args[1]) ||
+        !jerry_value_is_number(args[2])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (r, g, b)");
     }
 
-    JERRY_GET_NATIVE_PTR(lv_event_t, event, call_info_p->this_value, NULL);
-    if (event == NULL) {
-        return jerry_undefined();
-    }
+    uint8_t r = (uint8_t)jerry_value_as_number(args[0]);
+    uint8_t g = (uint8_t)jerry_value_as_number(args[1]);
+    uint8_t b = (uint8_t)jerry_value_as_number(args[2]);
 
-    lv_obj_t *target = lv_event_get_target(event);
-    if (target == NULL) {
-        return jerry_undefined();
-    }
-
-    jerry_value_t js_target = jerry_object();
-    jerry_object_set_native_ptr(js_target, NULL, target);
-    return js_target;
+    lv_color_t color = lv_color_make(r, g, b);
+    return jerry_number(color.full);
 }
 
 static const jerry_cfunc_entry_t jerry_cfunc_entry_list[] = {
     JERRY_CFUNC_ENTRY("lv_scr_act", js_lv_scr_act),
-    JERRY_CFUNC_ENTRY("lv_event_get_target", js_lv_event_get_target),
+    JERRY_CFUNC_ENTRY("lv_color_make", js_lv_color_make),
     JERRY_CFUNC_LIST_END() ,
 };
 

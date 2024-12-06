@@ -10,6 +10,49 @@ typedef struct _lv_event_dsc_t {
     lv_event_code_t filter : 8;
 } lv_event_dsc_t;
 
+lv_color_t jr_lvgl_convert_color_t(uint32_t color) {
+    lv_color_t lv_color;
+#if LV_COLOR_DEPTH == 32
+    // Assuming color is 0xAARRGGBB, extract ARGB8888 components
+    lv_color.ch.red = (color >> 16) & 0xFF;
+    lv_color.ch.green = (color >> 8) & 0xFF;
+    lv_color.ch.blue = color & 0xFF;
+    lv_color.ch.alpha = (color >> 24) & 0xFF;
+#elif LV_COLOR_DEPTH == 16
+#if LV_COLOR_16_SWAP == 0
+    // Assuming color is 0xRRGGBB, convert to RGB565
+    uint8_t red = (color >> 16) & 0xFF;
+    uint8_t green = (color >> 8) & 0xFF;
+    uint8_t blue = color & 0xFF;
+    // Normal RGB565 (5-6-5 bit arrangement)
+    lv_color.ch.red = red >> 3;      // 5 bits for red
+    lv_color.ch.green = green >> 2;  // 6 bits for green
+    lv_color.ch.blue = color & 0x1f; // 5 bits for blue
+#else
+    // Assuming color format is GH B R GL (3-5-5-3)
+    lv_color.ch.red = (color >> 3) & 0x1F ;    // 5 bits for red
+    lv_color.ch.green_l = color & 0x7;         // Lower 3 bits of green    
+    lv_color.ch.green_h = (color >> 13) & 0x7; // Upper 3 bits of green
+    lv_color.ch.blue = (color >> 8) & 0x1F ;   // 5 bits for blue
+#endif
+#elif LV_COLOR_DEPTH == 8
+    // Assuming color is grayscale or indexed
+    uint8_t red = (color >> 16) & 0xFF;
+    uint8_t green = (color >> 8) & 0xFF;
+    uint8_t blue = color & 0xFF;
+    lv_color.full = (uint8_t)(0.3 * red + 0.59 * green + 0.11 * blue);
+#else
+#error "Unsupported LV_COLOR_DEPTH"
+#endif
+    // printf("color =     %x\n", color);
+    // printf("color r:    %x\n", lv_color.ch.red);
+    // printf("color gh:   %x\n", lv_color.ch.green_h);
+    // printf("color gl:   %x\n", lv_color.ch.green_l);    
+    // printf("color b:    %x\n", lv_color.ch.blue);
+    // printf("color full: %x\n", lv_color.full);
+    return lv_color;
+}
+
 /* This function allocates memory, please free the text pointer after using it */
 char *jr_get_string(jerry_value_t value) {
     jerry_size_t size = jerry_string_size(value, JERRY_ENCODING_UTF8);

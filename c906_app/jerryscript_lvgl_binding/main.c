@@ -123,7 +123,7 @@ void jerryscript_lvgl_demo(void)
             "for (let i = 0; i < btnMapArray.length; i++) {\n"
                 "print(`Button ${i}: ${btnMapArray[i]}`);\n"
             "}\n"
-        "}\n";
+        "}\n";    
 #endif
 
 #if 1 /* Test canvas */
@@ -133,9 +133,8 @@ void jerryscript_lvgl_demo(void)
         "let cv = new Canvas(screen);\n"
         "cv.setSize(200, 200);\n"
         "cv.align(LV_ALIGN_CENTER, 0, 0);\n"
-        "const buf_size = (200 * 200 * 2);\n"
-        "cv.setBuffer(buf_size, 200, 200, LV_IMG_CF_RGB565);\n"
-        "cv.fillBg(0x001F, 255);\n";
+        "cv.setBuffer(200, 200, LV_IMG_CF_TRUE_COLOR);\n"
+        "cv.fillBg(lv_color_make(0, 255, 0), LV_OPA_COVER);\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -206,6 +205,32 @@ void create_button_matrix(void)
 }
 #endif
 
+void lvgl_canvas_demo(void)
+{
+    static lv_color_t buf[200 * 200];
+    lv_obj_t *screen = lv_scr_act();
+    lv_obj_t *cv = lv_canvas_create(screen);
+    lv_obj_set_size(cv, 200, 200);
+    lv_obj_align(cv, LV_ALIGN_CENTER, 0, 0);
+    lv_canvas_set_buffer(cv, buf, 200, 200, LV_IMG_CF_TRUE_COLOR);
+    lv_canvas_fill_bg(cv, lv_color_make(0, 0, 255), LV_OPA_COVER);
+    lv_color_t color = lv_color_make(0, 0, 255);
+#if LV_COLOR_DEPTH == 32
+    printf("color depth 32\n");
+    printf("color value: %x\n", color.full); // Use `.full` for 32-bit colors (ARGB8888)
+#elif LV_COLOR_DEPTH == 16
+    printf("color depth 16\n");
+    printf("color r:  %x\n", color.ch.red);
+    printf("color gh: %x\n", color.ch.green_h);
+    printf("color gl: %x\n", color.ch.green_l);    
+    printf("color b:  %x\n", color.ch.blue);
+    printf("color value: %x\n", color.full); // Use `.full` for 16-bit colors (RGB565)
+#elif LV_COLOR_DEPTH == 8
+    printf("color depth 8\n");
+    printf("color value: %x\n", color.full); // Use `.full` for 8-bit colors
+#endif    
+}
+
 void main()
 {
     lv_init();
@@ -216,6 +241,7 @@ void main()
 
     jerryscript_lvgl_demo();
     //create_button_matrix();
+    //lvgl_canvas_demo();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);

@@ -176,8 +176,9 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
                                           const jerry_value_t args[],
                                           const jerry_length_t args_count) {
-    if (args_count < 4 || !jerry_value_is_number(args[0]) || !jerry_value_is_number(args[1]) ||
-        !jerry_value_is_number(args[2]) || !jerry_value_is_number(args[3])) {
+    if (args_count < 3 || !jerry_value_is_number(args[0]) ||
+                          !jerry_value_is_number(args[1]) ||
+                          !jerry_value_is_number(args[2])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (buf, w, h, cf)");
     }
 
@@ -186,25 +187,25 @@ static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
         return jerry_undefined();
     }
 
-    jerry_length_t buf_size = jerry_value_as_number(args[0]);
+    lv_coord_t w = (lv_coord_t)jerry_value_as_number(args[0]);
+    lv_coord_t h = (lv_coord_t)jerry_value_as_number(args[1]);
+    lv_img_cf_t cf = (lv_img_cf_t)jerry_value_as_number(args[2]);
 
-    void *buf = malloc(buf_size);
+    uint32_t pixel_size = w * h * sizeof(lv_color_t);
+
+    void *buf = malloc(pixel_size);
     if (buf == NULL) {
         printf("%s %s error buffer\n", LV_OBJ_NAME, __FUNCTION__);
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
     }
 
-    memset(buf, 0, buf_size);
+    memset(buf, 0, pixel_size);
 
     /* store buffer pointer into user data */
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     if(user_data != NULL){
         user_data->buf = buf;
     }
-
-    lv_coord_t w = (lv_coord_t)jerry_value_as_number(args[1]);
-    lv_coord_t h = (lv_coord_t)jerry_value_as_number(args[2]);
-    lv_img_cf_t cf = (lv_img_cf_t)jerry_value_as_number(args[3]);
 
     lv_canvas_set_buffer(obj, buf, w, h, cf);
 
@@ -472,13 +473,8 @@ static jerry_value_t js_lv_canvas_fill_bg(const jerry_call_info_t *call_info_p,
         return jerry_undefined();
     }
 
-    uint32_t color_value = (uint32_t)jerry_value_as_number(args[0]);
-    lv_color_t color = LV_COLOR_MAKE(
-        (uint8_t)((color_value >> 16) & 0xFF),
-        (uint8_t)((color_value >> 8) & 0xFF),
-        (uint8_t)(color_value & 0xFF)
-    );
-
+    uint32_t color_full = (uint32_t)jerry_value_as_number(args[0]);
+    lv_color_t color = jr_lvgl_convert_color_t(color_full);
     lv_opa_t opa = (lv_opa_t)jerry_value_as_number(args[1]);
     lv_canvas_fill_bg(canvas, color, opa);
     return jerry_undefined();
