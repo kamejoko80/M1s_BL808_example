@@ -207,7 +207,7 @@ void jerryscript_lvgl_demo(void)
             "align: LV_TEXT_ALIGN_CENTER\n"
         "};\n"
         "cv.drawText(50, 150, 100, draw_text_dsc, 'Hello, LVGL!');\n"
-        /********** draw img demo ************/                
+        /********** draw img demo ************/
         "let src = {\n"
             "data: new ArrayBuffer(20 * 20 * 2), // 20x20 pixels, RGB565\n"
             "width: 20,\n"
@@ -228,48 +228,57 @@ void jerryscript_lvgl_demo(void)
         "};\n"
         "cv.drawImg(100, 0, src, draw_img_dsc);\n"
         /********** draw line demo ************/
-        "let points = [\n"
+        "let line_points = [\n"
             "{ x: 50, y: 50 },\n"
             "{ x: 150, y: 150 },\n"
             "{ x: 150, y: 50 }\n"
         "];\n"
         "let draw_line_dsc = {\n"
-            "color: 0xFF0000,    // Red color\n"
-            "width: 5,           // Line width\n"
-            "opa: 255,           // Full opacity\n"
+            "color: lv_color_make(0, 0, 0xFF), // Blue color\n"
+            "width: 5,                         // Line width\n"
+            "opa: 255,                         // Full opacity\n"
             "blend_mode: 0,\n"
-            "dash_width: 10,     // Dash width for dashed line\n"
-            "dash_gap: 5,        // Gap width for dashed line\n"
-            "round_start: true,  // Rounded start\n"
-            "round_end: true,    // Rounded end\n"
-            "raw_end: false      // Do not skip perpendicular end lines\n"
+            "dash_width: 10,                   // Dash width for dashed line\n"
+            "dash_gap: 5,                      // Gap width for dashed line\n"
+            "round_start: true,                // Rounded start\n"
+            "round_end: true,                  // Rounded end\n"
+            "raw_end: false                    // Do not skip perpendicular end lines\n"
         "};"
-        "cv.drawLine(points, points.length, draw_line_dsc);\n"
+        "cv.drawLine(line_points, line_points.length, draw_line_dsc);\n"
         /********** draw polygon demo ************/
-        "let points = [\n"
-            "{ x: 50, y: 50 },\n"
-            "{ x: 150, y: 50 },\n"
+        "let poly_points = [\n"
             "{ x: 150, y: 150 },\n"
-            "{ x: 50, y: 150 }\n"
+            "{ x: 170, y: 150 },\n"
+            "{ x: 170, y: 170 },\n"
+            "{ x: 150, y: 170 }\n"
         "];\n"
-        "let draw_dsc = {\n"
-            "radius: 10,                  // Rounded corners\n"
-            "bg_color: 0x00FF00,          // Green background\n"
-            "bg_opa: 255,                 // Fully opaque background\n"
-            "border_color: 0xFF0000,      // Red border\n"
-            "border_width: 5,             // Border width of 5\n"
-            "border_opa: 200,             // Semi-transparent border\n"
-            "outline_color: 0x0000FF,     // Blue outline\n"
-            "outline_width: 3,            // Outline width of 3\n"
-            "shadow_color: 0x888888,      // Grey shadow\n"
-            "shadow_width: 10,            // Shadow width of 10\n"
-            "shadow_ofs_x: 5,             // Shadow offset x\n"
-            "shadow_ofs_y: 5,             // Shadow offset y\n"
-            "shadow_opa: 128,             // Semi-transparent shadow\n"
-            "bg_img_tiled: false,         // No background image tiling\n"
-            "border_post: true            // Border is drawn on top\n"
+        "let draw_poly_dsc = {\n"
+            "radius: 10,                                    // Rounded corners\n"
+            "bg_color: lv_color_make(0xFF, 0, 0),           // Red background\n"
+            "bg_opa: 255,                                   // Fully opaque background\n"
+            "border_color: lv_color_make(0, 0, 0xFF),       // Blue border\n"
+            "border_width: 10,                              // Border width of 5\n"
+            "border_opa: 200,                               // Semi-transparent border\n"
+            "outline_color: lv_color_make(0, 0 , 0xFF),     // Blue outline\n"
+            "outline_width: 10,                             // Outline width of 3\n"
+            "shadow_color: lv_color_make(0, 0, 0),          // Black shadow\n"
+            "shadow_width: 10,                              // Shadow width of 10\n"
+            "shadow_ofs_x: 5,                               // Shadow offset x\n"
+            "shadow_ofs_y: 5,                               // Shadow offset y\n"
+            "shadow_opa: 128,                               // Semi-transparent shadow\n"
+            "bg_img_tiled: false,                           // No background image tiling\n"
+            "border_post: true                              // Border is drawn on top\n"
         "};\n"
-        "cv.drawPolygon(points, points.length, draw_dsc);\n";
+        "cv.drawPolygon(poly_points, poly_points.length, draw_poly_dsc);\n"
+        /********** draw arc demo ************/
+        "let draw_arc_dsc = {\n"
+            "color: lv_color_make(0xFF, 0, 0), // Red color\n"
+            "width: 5,                         // Arc width\n"
+            "opa: 255,                         // Full opacity\n"
+            "blend_mode: 0,\n"
+            "rounded: true                     // Rounded ends\n"
+        "};\n"
+        "cv.drawArc(100, 100, 50, 45, 270, draw_arc_dsc);\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -318,7 +327,6 @@ void btnm_event_cb(lv_event_t *e)
     printf("Button %s pressed\n", txt);
 }
 
-#if 0
 void create_button_matrix(void)
 {
     static const char *btn_map[] = {
@@ -338,7 +346,6 @@ void create_button_matrix(void)
     /* Add an event callback */
     lv_obj_add_event_cb(btnm, btnm_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 }
-#endif
 
 void lvgl_canvas_demo(void)
 {
@@ -409,7 +416,7 @@ void lv_canvas_draw_img_demo(void) {
     lv_canvas_draw_img(canvas, 50, 50, &img_dsc, &draw_dsc);
 }
 
-void lv_canvas_draw_polygon_example(void) {
+void lv_canvas_draw_polygon_demo(void) {
 
     // Create a canvas
     lv_obj_t *canvas = lv_canvas_create(lv_scr_act());
@@ -455,6 +462,29 @@ void lv_canvas_draw_polygon_example(void) {
     lv_canvas_draw_polygon(canvas, points, 4, &draw_dsc);
 }
 
+void lv_canvas_draw_arc_demo(void) {
+    // Allocate a buffer for the canvas
+    static lv_color_t canvas_buf[200 * 200];
+    lv_obj_t *canvas = lv_canvas_create(lv_scr_act());
+    lv_canvas_set_buffer(canvas, canvas_buf, 200, 200, LV_IMG_CF_TRUE_COLOR);
+
+    // Fill the canvas with a white background
+    lv_canvas_fill_bg(canvas, lv_color_make(255, 255, 255), LV_OPA_COVER);
+
+    // Define and initialize the draw descriptor
+    lv_draw_arc_dsc_t draw_dsc;
+    lv_draw_arc_dsc_init(&draw_dsc);
+
+    draw_dsc.color = lv_color_make(0xFF, 0, 0); // Red color
+    draw_dsc.width = 5;                         // Arc width
+    draw_dsc.opa = LV_OPA_COVER;                // Full opacity
+    draw_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
+    draw_dsc.rounded = 1;                    // Rounded ends
+
+    // Draw an arc on the canvas
+    lv_canvas_draw_arc(canvas, 100, 100, 50, 45, 270, &draw_dsc);
+}
+
 void main()
 {
     lv_init();
@@ -463,11 +493,12 @@ void main()
 
     printf("Execute jerryscript demo\r\n");
 
-    //jerryscript_lvgl_demo();
+    jerryscript_lvgl_demo();
     //create_button_matrix();
     //lvgl_canvas_demo();
     //lv_canvas_draw_img_demo();
-    lv_canvas_draw_polygon_example();
+    //lv_canvas_draw_polygon_demo();
+    //lv_canvas_draw_arc_demo();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);

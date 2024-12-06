@@ -621,21 +621,21 @@ static jerry_value_t js_lv_canvas_draw_rect(const jerry_call_info_t *call_info_p
     jerry_value_t bg_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("bg_color"));
     if (jerry_value_is_number(bg_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(bg_color_val);
-        draw_dsc.bg_color = lv_color_hex(color);
+        draw_dsc.bg_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(bg_color_val);
 
     jerry_value_t border_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("border_color"));
     if (jerry_value_is_number(border_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(border_color_val);
-        draw_dsc.border_color = lv_color_hex(color);
+        draw_dsc.border_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(border_color_val);
 
     jerry_value_t shadow_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("shadow_color"));
     if (jerry_value_is_number(shadow_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(shadow_color_val);
-        draw_dsc.shadow_color = lv_color_hex(color);
+        draw_dsc.shadow_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(shadow_color_val);
 
@@ -686,21 +686,21 @@ static jerry_value_t js_lv_canvas_draw_text(const jerry_call_info_t *call_info_p
     jerry_value_t color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("color"));
     if (jerry_value_is_number(color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(color_val);
-        draw_dsc.color = lv_color_hex(color);
+        draw_dsc.color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(color_val);
 
     jerry_value_t sel_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("sel_color"));
     if (jerry_value_is_number(sel_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(sel_color_val);
-        draw_dsc.sel_color = lv_color_hex(color);
+        draw_dsc.sel_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(sel_color_val);
 
     jerry_value_t sel_bg_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("sel_bg_color"));
     if (jerry_value_is_number(sel_bg_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(sel_bg_color_val);
-        draw_dsc.sel_bg_color = lv_color_hex(color);
+        draw_dsc.sel_bg_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(sel_bg_color_val);
 
@@ -816,7 +816,7 @@ static jerry_value_t js_lv_canvas_draw_img(const jerry_call_info_t *call_info_p,
     jerry_value_t recolor_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("recolor"));
     if (jerry_value_is_number(recolor_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(recolor_val);
-        draw_dsc.recolor = lv_color_hex(color);
+        draw_dsc.recolor = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(recolor_val);
 
@@ -907,7 +907,7 @@ static jerry_value_t js_lv_canvas_draw_line(const jerry_call_info_t *call_info_p
     jerry_value_t color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("color"));
     if (jerry_value_is_number(color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(color_val);
-        draw_dsc.color = lv_color_hex(color);
+        draw_dsc.color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(color_val);
 
@@ -1019,28 +1019,28 @@ static jerry_value_t js_lv_canvas_draw_polygon(const jerry_call_info_t *call_inf
     jerry_value_t bg_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("bg_color"));
     if (jerry_value_is_number(bg_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(bg_color_val);
-        draw_dsc.bg_color = lv_color_hex(color);
+        draw_dsc.bg_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(bg_color_val);
 
     jerry_value_t border_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("border_color"));
     if (jerry_value_is_number(border_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(border_color_val);
-        draw_dsc.border_color = lv_color_hex(color);
+        draw_dsc.border_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(border_color_val);
 
     jerry_value_t outline_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("outline_color"));
     if (jerry_value_is_number(outline_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(outline_color_val);
-        draw_dsc.outline_color = lv_color_hex(color);
+        draw_dsc.outline_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(outline_color_val);
 
     jerry_value_t shadow_color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("shadow_color"));
     if (jerry_value_is_number(shadow_color_val)) {
         uint32_t color = (uint32_t)jerry_value_as_number(shadow_color_val);
-        draw_dsc.shadow_color = lv_color_hex(color);
+        draw_dsc.shadow_color = jr_lvgl_color_to_color_t(color);
     }
     jerry_value_free(shadow_color_val);
 
@@ -1062,6 +1062,7 @@ static jerry_value_t js_lv_canvas_draw_polygon(const jerry_call_info_t *call_inf
 
     // Free allocated memory
     free(points);
+
     return jerry_undefined();
 }
 
@@ -1075,23 +1076,66 @@ static jerry_value_t js_lv_canvas_draw_arc(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (x, y, r, start_angle, end_angle, draw_dsc)");
     }
 
+    // Retrieve the native canvas object
     JERRY_GET_NATIVE_PTR(lv_obj_t, canvas, call_info_p->this_value, &jerry_obj_native_info);
     if (canvas == NULL) {
         return jerry_undefined();
     }
 
+    // Extract positional arguments
     lv_coord_t x = (lv_coord_t)jerry_value_as_number(args[0]);
     lv_coord_t y = (lv_coord_t)jerry_value_as_number(args[1]);
     lv_coord_t r = (lv_coord_t)jerry_value_as_number(args[2]);
     int32_t start_angle = (int32_t)jerry_value_as_number(args[3]);
     int32_t end_angle = (int32_t)jerry_value_as_number(args[4]);
 
-    JERRY_GET_NATIVE_PTR(lv_draw_arc_dsc_t, draw_dsc, args[5], &jerry_obj_native_info);
-    if (draw_dsc == NULL) {
-        return jerry_undefined();
+    // Extract and initialize the draw descriptor
+    jerry_value_t draw_dsc_obj = args[5];
+    lv_draw_arc_dsc_t draw_dsc;
+    lv_draw_arc_dsc_init(&draw_dsc); // Initialize with default values
+
+    // Assign draw descriptor properties
+    SET_FIELD_IF_PRESENT("width", width, lv_coord_t);
+    SET_FIELD_IF_PRESENT("opa", opa, lv_opa_t);
+    SET_FIELD_IF_PRESENT("blend_mode", blend_mode, lv_blend_mode_t);
+
+    // Handle color
+    jerry_value_t color_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("color"));
+    if (jerry_value_is_number(color_val)) {
+        uint32_t color = (uint32_t)jerry_value_as_number(color_val);
+        draw_dsc.color = jr_lvgl_color_to_color_t(color);
+    }
+    jerry_value_free(color_val);
+
+    // Handle img_src (if provided as ArrayBuffer)
+    jerry_value_t img_src_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("img_src"));
+    if (jerry_value_is_arraybuffer(img_src_val)) {
+        jerry_length_t buf_size = jerry_arraybuffer_size(img_src_val);
+        void *native_buf = malloc(buf_size);
+        if (native_buf == NULL) {
+            jerry_value_free(img_src_val);
+            return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed for img_src");
+        }
+        jerry_arraybuffer_read(img_src_val, 0, native_buf, buf_size);
+        draw_dsc.img_src = native_buf;
+    }
+    jerry_value_free(img_src_val);
+
+    // Handle rounded flag
+    jerry_value_t rounded_val = jerry_object_get(draw_dsc_obj, jerry_string_sz("rounded"));
+    if (jerry_value_is_boolean(rounded_val)) {
+        draw_dsc.rounded = jerry_value_is_true(rounded_val);
+    }
+    jerry_value_free(rounded_val);
+
+    // Draw the arc
+    lv_canvas_draw_arc(canvas, x, y, r, start_angle, end_angle, &draw_dsc);
+
+    // Free allocated buffer for img_src (if used)
+    if (draw_dsc.img_src) {
+        free((void *)draw_dsc.img_src);
     }
 
-    lv_canvas_draw_arc(canvas, x, y, r, start_angle, end_angle, draw_dsc);
     return jerry_undefined();
 }
 
