@@ -485,6 +485,8 @@ void lv_canvas_draw_arc_demo(void) {
     lv_canvas_draw_arc(canvas, 100, 100, 50, 45, 270, &draw_dsc);
 }
 
+extern void execute_launcher(void);
+
 void main()
 {
     lv_init();
@@ -493,12 +495,13 @@ void main()
 
     printf("Execute jerryscript demo\r\n");
 
-    jerryscript_lvgl_demo();
+    //jerryscript_lvgl_demo();
     //create_button_matrix();
     //lvgl_canvas_demo();
     //lv_canvas_draw_img_demo();
     //lv_canvas_draw_polygon_demo();
     //lv_canvas_draw_arc_demo();
+    execute_launcher();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);
