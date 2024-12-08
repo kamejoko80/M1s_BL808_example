@@ -2,77 +2,106 @@
 #include "lvgl.h"
 #include <math.h>
 
-/* Function to draw the segment shape on a canvas */
-static void draw_segment_on_canvas(lv_obj_t *canvas, int start_angle, int end_angle, int outer_radius, int inner_radius, lv_color_t color)
-{
-    lv_draw_line_dsc_t line_dsc;
-    lv_draw_line_dsc_init(&line_dsc);
-    line_dsc.color = color;
-    line_dsc.width = 2; // Line thickness
+/* Global variable to track the selected container */
+static lv_obj_t *selected_icon = NULL;
 
-    lv_point_t outer_points[end_angle - start_angle + 1];
-    lv_point_t inner_points[end_angle - start_angle + 1];
+/* Event callback for icon press */
+static void app_icon_event_cb(lv_event_t *e) {
+    lv_obj_t *cont = lv_event_get_target(e);
 
-    int center_x = 100;
-    int center_y = 100;
-
-    // Calculate the points for the outer and inner arcs
-    int idx = 0;
-    for (int angle = start_angle; angle <= end_angle; angle++)
-    {
-        float rad = angle * M_PI / 180.0f;
-        outer_points[idx].x = center_x + outer_radius * cos(rad);
-        outer_points[idx].y = center_y + outer_radius * sin(rad);
-
-        inner_points[idx].x = center_x + inner_radius * cos(rad);
-        inner_points[idx].y = center_y + inner_radius * sin(rad);
-
-        idx++;
+    /* Remove highlight from the previously selected icon */
+    if (selected_icon) {
+        lv_obj_clear_state(selected_icon, LV_STATE_CHECKED);
+        selected_icon = NULL;
     }
 
-    // Draw the outer arc
-    for (int i = 0; i < idx - 1; i++)
-    {
-        lv_point_t points[] = {outer_points[i], outer_points[i + 1]};
-        lv_canvas_draw_line(canvas, points, 2, &line_dsc);
-    }
+    /* Highlight the currently selected icon */
+    selected_icon = cont;
+    lv_obj_add_state(cont, LV_STATE_CHECKED);
 
-    // Draw the inner arc
-    for (int i = 0; i < idx - 1; i++)
-    {
-        lv_point_t points[] = {inner_points[i], inner_points[i + 1]};
-        lv_canvas_draw_line(canvas, points, 2, &line_dsc);
-    }
-
-    // Connect the outer and inner arcs to close the shape
-    lv_point_t connect1[] = {outer_points[0], inner_points[0]};
-    lv_canvas_draw_line(canvas, connect1, 2, &line_dsc);
-
-    lv_point_t connect2[] = {outer_points[idx - 1], inner_points[idx - 1]};
-    lv_canvas_draw_line(canvas, connect2, 2, &line_dsc);
+    LV_LOG_USER("App icon selected!");
 }
 
-/* Function to create the launcher */
-void create_launcher(lv_obj_t *parent)
-{    
-    // Create a canvas for drawing the segment
-    static lv_color_t buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR(200, 200)];
-    lv_obj_t *canvas = lv_canvas_create(parent);
-    lv_obj_set_size(canvas, 200, 200);
-    lv_obj_align(canvas, LV_ALIGN_CENTER, 0, 0);
-    lv_canvas_set_buffer(canvas, buf, 200, 200, LV_IMG_CF_TRUE_COLOR);
-    lv_canvas_fill_bg(canvas, lv_color_make(255, 255, 255), LV_OPA_TRANSP);
+/* Function to create a single app icon */
+static lv_obj_t *create_app_icon(lv_obj_t *parent, const void *icon_src, const char *label_text) {
+    /* Create a container for the icon and label */
+    lv_obj_t *cont = lv_obj_create(parent);
+    lv_obj_set_size(cont, 70, 80); // Icon container size
+    lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-    draw_segment_on_canvas(canvas, 0,   60,  90, 20, lv_color_make(255, 0, 0));
-    draw_segment_on_canvas(canvas, 60,  120, 90, 20, lv_color_make(255, 0, 0));
-    draw_segment_on_canvas(canvas, 120, 180, 90, 20, lv_color_make(255, 0, 0));
-    draw_segment_on_canvas(canvas, 180, 240, 90, 20, lv_color_make(255, 0, 0));
-    draw_segment_on_canvas(canvas, 240, 300, 90, 20, lv_color_make(255, 0, 0));
+    /* Add the app icon */
+    lv_obj_t *icon = lv_img_create(cont);
+    lv_img_set_src(icon, icon_src);
+    lv_obj_set_style_pad_all(icon, 0, 0);
+
+    /* Add the app label */
+    lv_obj_t *label = lv_label_create(cont);
+    lv_label_set_text(label, label_text);
+    lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+
+    /* Add a futuristic neon style to the container */
+    static lv_style_t style_default, style_checked, style_pressed;
+    static bool style_initialized = false;
+
+    if (!style_initialized) {
+        /* Default style with neon glow */
+        lv_style_init(&style_default);
+        lv_style_set_radius(&style_default, 10);
+        lv_style_set_border_width(&style_default, 4);
+        lv_style_set_border_color(&style_default, lv_palette_main(LV_PALETTE_BLUE));
+        lv_style_set_shadow_color(&style_default, lv_palette_main(LV_PALETTE_BLUE));
+        lv_style_set_shadow_width(&style_default, 10); // Neon glow effect
+        lv_style_set_shadow_spread(&style_default, 2);
+
+        /* Checked state style */
+        lv_style_init(&style_checked);
+        lv_style_set_bg_color(&style_checked, lv_palette_darken(LV_PALETTE_BLUE, 3));
+        lv_style_set_border_color(&style_checked, lv_palette_main(LV_PALETTE_CYAN));
+
+        /* Pressed state style */
+        lv_style_init(&style_pressed);
+        lv_style_set_bg_color(&style_pressed, lv_palette_darken(LV_PALETTE_BLUE, 1));
+
+        style_initialized = true;
+    }
+
+    lv_obj_add_style(cont, &style_default, 0);              // Apply default style
+    lv_obj_add_style(cont, &style_checked, LV_STATE_CHECKED); // Apply checked style
+    lv_obj_add_style(cont, &style_pressed, LV_STATE_PRESSED); // Apply pressed style
+
+    /* Add event callback to the container */
+    lv_obj_add_event_cb(cont, app_icon_event_cb, LV_EVENT_CLICKED, NULL);
+
+    return cont;
+}
+
+/* Function to create the app launcher */
+void create_app_launcher(void) {
+    /* Get the active screen */
+    lv_obj_t *scr = lv_scr_act();
+
+    /* Create a container for the app icons */
+    lv_obj_t *grid = lv_obj_create(scr);
+    lv_obj_set_style_bg_color(grid, lv_color_black(), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(grid, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_size(grid, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_flex_flow(grid, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_flex_align(grid, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+    lv_obj_set_style_pad_column(grid, 10, 0);
+    lv_obj_set_style_pad_row(grid, 20, 0);
+
+    /* Create app icons */
+    create_app_icon(grid, LV_SYMBOL_HOME, "Home");
+    create_app_icon(grid, LV_SYMBOL_SETTINGS, "Settings");
+    create_app_icon(grid, LV_SYMBOL_FILE, "Files");
+    create_app_icon(grid, LV_SYMBOL_WIFI, "Wi-Fi");
+    create_app_icon(grid, LV_SYMBOL_BATTERY_FULL, "Battery");
+    create_app_icon(grid, LV_SYMBOL_BELL, "Notifications");
 }
 
 /* Execute the launcher on the active screen */
 void execute_launcher(void)
 {
-    lv_obj_t *scr = lv_scr_act(); // Get the active screen
-    create_launcher(scr);         // Create the launcher on the active screen
+    create_app_launcher();
 }
