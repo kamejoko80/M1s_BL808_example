@@ -101,6 +101,9 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
 
     /* user data settings */
     jerry_lv_user_data_t *user_data = malloc(sizeof(jerry_lv_user_data_t));
+    if(user_data == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to allocate userdata");
+    }
     lv_obj_set_user_data(obj, user_data);
 
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */

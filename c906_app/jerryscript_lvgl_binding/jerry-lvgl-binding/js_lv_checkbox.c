@@ -32,16 +32,15 @@
 #include "jerryscript-ext/properties.h"
 
 /* Change the object appropriately */
-#define LV_OBJ_NAME           "Template"
-#define LV_OBJ_CREATE(parent) lv_btn_create(parent)
+#define LV_OBJ_NAME           "CheckBox"
+#define LV_OBJ_CREATE(parent) lv_checkbox_create(parent)
 
 /************************************************************************
 * Typedef
 *************************************************************************/
 
 typedef struct {
-    uint32_t value;
-    char     *name;
+    char *static_text;
 } jerry_lv_user_data_t;
 
 /************************************************************************
@@ -69,8 +68,8 @@ static void js_lv_clear_user_data_cb(lv_obj_t *obj) {
 
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     if (user_data != NULL) {
-        if (user_data->name != NULL) {
-            free(user_data->name);
+        if (user_data->static_text != NULL) {
+            free(user_data->static_text);
         }
         free(user_data);
         lv_obj_set_user_data(obj, NULL);
@@ -101,19 +100,12 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
-    /* user data setting example */
+    /* user data setting */
     jerry_lv_user_data_t *user_data = malloc(sizeof(jerry_lv_user_data_t));
     if(user_data == NULL) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to allocate userdata");
     }
     lv_obj_set_user_data(obj, user_data);
-
-    /* later we can set user data as bellow */
-    // jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
-    // if(user_data != NULL){
-    //    user_data->value = 1;
-    //    user_data->name = strdup("Some text");
-    // }
 
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
@@ -185,6 +177,80 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
+static jerry_value_t js_lv_checkbox_set_text(const jerry_call_info_t *call_info_p,
+                                             const jerry_value_t args[],
+                                             const jerry_length_t args_count) {
+    if (args_count < 1 || !jerry_value_is_string(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (text)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid checkbox object");
+    }
+
+    jerry_size_t text_size = jerry_string_size(args[0], JERRY_ENCODING_UTF8);
+    char *text = malloc(text_size + 1);
+    if (!text) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
+    }
+    jerry_string_to_buffer(args[0], JERRY_ENCODING_UTF8, (jerry_char_t *)text, text_size);
+    text[text_size] = '\0';
+
+    lv_checkbox_set_text(obj, text);
+
+    free(text);
+
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_checkbox_set_text_static(const jerry_call_info_t *call_info_p,
+                                                    const jerry_value_t args[],
+                                                    const jerry_length_t args_count) {
+    if (args_count < 1 || !jerry_value_is_string(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (text)");
+    }
+
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid checkbox object");
+    }
+
+    jerry_size_t text_size = jerry_string_size(args[0], JERRY_ENCODING_UTF8);
+    char *text = malloc(text_size + 1);
+    if (!text) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
+    }
+    jerry_string_to_buffer(args[0], JERRY_ENCODING_UTF8, (jerry_char_t *)text, text_size);
+    text[text_size] = '\0';
+
+    /* store the static text in user data */
+    jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
+    if(user_data != NULL){
+        user_data->static_text = text;
+    }
+
+    lv_checkbox_set_text_static(obj, text);
+
+    return jerry_undefined();
+}
+
+static jerry_value_t js_lv_checkbox_get_text(const jerry_call_info_t *call_info_p,
+                                             const jerry_value_t args[],
+                                             const jerry_length_t args_count) {
+    JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
+    if (obj == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid checkbox object");
+    }
+
+    const char *text = lv_checkbox_get_text(obj);
+    if (text == NULL) {
+        return jerry_undefined();
+    }
+
+    return jerry_string_sz(text);
+}
+
 /************************************************************************
 * Class register functions
 *************************************************************************/
@@ -193,9 +259,12 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
 
     jerryx_property_entry methods[] =
     {
-        JERRYX_PROPERTY_FUNCTION ("align",   js_lv_obj_align),
-        JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
-        JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_obj_on_press),
+        JERRYX_PROPERTY_FUNCTION ("align",         js_lv_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("setSize",       js_lv_obj_set_size),
+        JERRYX_PROPERTY_FUNCTION ("onPress",       js_lv_obj_on_press),
+        JERRYX_PROPERTY_FUNCTION ("setText",       js_lv_checkbox_set_text),
+        JERRYX_PROPERTY_FUNCTION ("setTextStatic", js_lv_checkbox_set_text_static),
+        JERRYX_PROPERTY_FUNCTION ("getText",       js_lv_checkbox_get_text),
         JERRYX_PROPERTY_LIST_END(),
     };
 
@@ -215,6 +284,6 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
     jerry_value_free(global_obj);
 }
 
-void jr_lv_template_init(void) {
+void jr_lv_checkbox_init(void) {
     jr_lv_obj_class_register(js_lv_obj_constructor);
 }

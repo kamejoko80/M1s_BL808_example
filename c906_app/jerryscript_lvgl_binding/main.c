@@ -34,6 +34,7 @@
 #include "js_lv_bar.h"
 #include "js_lv_btnmatrix.h"
 #include "js_lv_canvas.h"
+#include "js_lv_checkbox.h"
 
 static void lvgl_task(void *param)
 {
@@ -126,7 +127,7 @@ void jerryscript_lvgl_demo(void)
         "}\n";
 #endif
 
-#if 1 /* Test canvas */
+#if 0 /* Test canvas */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -281,6 +282,20 @@ void jerryscript_lvgl_demo(void)
         "cv.drawArc(100, 100, 50, 45, 270, draw_arc_dsc);\n";
 #endif
 
+#if 1 /* Test checkbox */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let chb1 = new CheckBox(screen);\n"
+        "let chb2 = new CheckBox(screen);\n"        
+        "chb1.align(LV_ALIGN_TOP_LEFT, 0, 0);\n"
+        "chb2.align(LV_ALIGN_BOTTOM_LEFT, 0, 0);\n"        
+        "chb1.setText('Dynamic Text Example');\n"
+        "chb2.setTextStatic('Static Text Example');\n"
+        "print(chb1.getText());\n"
+        "print(chb2.getText());\n";
+#endif
+
     const jerry_length_t script_size = sizeof (script) - 1;
 
     /* Initialize engine */
@@ -295,6 +310,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_bar_init();
     jr_lv_btnmatrix_init();
     jr_lv_canvas_init();
+    jr_lv_checkbox_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
@@ -495,13 +511,13 @@ void main()
 
     printf("Execute jerryscript demo\r\n");
 
-    //jerryscript_lvgl_demo();
+    jerryscript_lvgl_demo();
     //create_button_matrix();
     //lvgl_canvas_demo();
     //lv_canvas_draw_img_demo();
     //lv_canvas_draw_polygon_demo();
     //lv_canvas_draw_arc_demo();
-    execute_launcher();
+    //execute_launcher();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);
