@@ -297,7 +297,7 @@ void jerryscript_lvgl_demo(void)
         "print(chb2.getText());\n";
 #endif
 
-#if 1 /* Test checkbox */
+#if 1 /* Test dropdown */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
