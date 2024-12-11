@@ -37,6 +37,7 @@
 #include "js_lv_checkbox.h"
 #include "js_lv_dropdown.h"
 #include "js_lv_img.h"
+#include "js_lv_line.h"
 
 static void lvgl_task(void *param)
 {
@@ -341,7 +342,7 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
-#if 1 /* Test img */
+#if 0 /* Test img */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -366,8 +367,8 @@ void jerryscript_lvgl_demo(void)
         "const retrievedBuffer = img.getSrc();\n"
         "if (retrievedBuffer instanceof ArrayBuffer) {\n"
             "const retrievedView = new Uint8Array(retrievedBuffer);\n"
-            "// Example size of lv_img_dsc_t, depends on your system\n"    
-            "const structSize = 16;\n" 
+            "// Example size of lv_img_dsc_t, depends on your system\n"
+            "const structSize = 16;\n"
             "print('Image metadata:');\n"
             "for (let i = 0; i < structSize; i++) {\n"
                 "print(`Byte ${i}: ${retrievedView[i]}`);\n"
@@ -378,7 +379,28 @@ void jerryscript_lvgl_demo(void)
             "}\n"
         "} else {\n"
             "print('Failed to retrieve the image source.');\n"
-        "}\n";        
+        "}\n";
+#endif
+
+#if 1 /* Test line */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let line = new Line(screen);\n"
+        "const points = [\n"
+            "{ x: 5, y: 5 },\n"
+            "{ x: 70, y: 70 },\n"
+            "{ x: 120, y: 10 },\n"
+            "{ x: 180, y: 60 },\n"
+            "{ x: 240, y: 10 }\n"
+        "];\n"
+        "line.setPoints(points, 5);\n"
+        "line.setYInvert(true);\n"
+        "if (line.getYInvert()) {\n"
+            "print('Y-axis inversion is enabled.');\n"
+        "} else {\n"
+            "print('Y-axis inversion is disabled.');\n"
+        "}\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -398,6 +420,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_checkbox_init();
     jr_lv_dropdown_init();
     jr_lv_img_init();
+    jr_lv_line_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
@@ -639,6 +662,26 @@ void test_lv_img_with_buffer(void) {
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 }
 
+void lv_example_line(void)
+{
+    /*Create an array for the points of the line*/
+    static lv_point_t line_points[] = { {5, 5}, {70, 70}, {120, 10}, {180, 60}, {240, 10} };
+
+    /*Create style*/
+    static lv_style_t style_line;
+    lv_style_init(&style_line);
+    lv_style_set_line_width(&style_line, 8);
+    lv_style_set_line_color(&style_line, lv_palette_main(LV_PALETTE_BLUE));
+    lv_style_set_line_rounded(&style_line, true);
+
+    /*Create a line and apply the new style*/
+    lv_obj_t * line;
+    line = lv_line_create(lv_scr_act());
+    lv_line_set_points(line, line_points, 5);     /*Set the points*/
+    lv_obj_add_style(line, &style_line, 0);
+    lv_obj_center(line);
+}
+
 void main()
 {
     lv_init();
@@ -656,6 +699,7 @@ void main()
     //execute_launcher();
     //create_dropdown_with_symbol();
     //test_lv_img_with_buffer();
+    //lv_example_line();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);
