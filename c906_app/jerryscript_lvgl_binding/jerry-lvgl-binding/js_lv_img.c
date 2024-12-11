@@ -180,9 +180,8 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
 static jerry_value_t js_lv_img_set_src(const jerry_call_info_t *call_info_p,
                                        const jerry_value_t args[],
                                        const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);                                           
-    if (args_count < 1 || !jerry_value_is_object(args[0])) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (src as ArrayBuffer or object)");
+    if (args_count < 1 || !jerry_value_is_array(args[0])) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (src as array)");
     }
 
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
@@ -190,28 +189,71 @@ static jerry_value_t js_lv_img_set_src(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid image object");
     }
 
-    jerry_length_t src_size = jerry_arraybuffer_size(args[0]);
-    if (src_size == 0) {
-        return jerry_throw_sz(JERRY_ERROR_TYPE, "Source size is zero");
+    jerry_value_t src_array = args[0];
+
+    // Extract width
+    jerry_value_t width_val = jerry_object_get_index(src_array, 0);
+    if (!jerry_value_is_number(width_val)) {
+        jerry_value_free(width_val);
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Width should be a number");
+    }
+    lv_coord_t width = (lv_coord_t)jerry_value_as_number(width_val);
+    jerry_value_free(width_val);
+
+    // Extract height
+    jerry_value_t height_val = jerry_object_get_index(src_array, 1);
+    if (!jerry_value_is_number(height_val)) {
+        jerry_value_free(height_val);
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Height should be a number");
+    }
+    lv_coord_t height = (lv_coord_t)jerry_value_as_number(height_val);
+    jerry_value_free(height_val);
+
+    // Extract data buffer
+    jerry_value_t data_val = jerry_object_get_index(src_array, 2);
+    if (!jerry_value_is_arraybuffer(data_val)) {
+        jerry_value_free(data_val);
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Data should be an ArrayBuffer");
     }
 
-    void *src_buffer = malloc(src_size);
-    if (!src_buffer) {
+    jerry_length_t buffer_size = jerry_arraybuffer_size(data_val);
+    size_t expected_size = width * height * sizeof(lv_color_t);
+    if (buffer_size != expected_size) {
+        jerry_value_free(data_val);
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Buffer size does not match width * height * sizeof(lv_color_t)");
+    }
+
+    void *buffer = malloc(buffer_size);
+    if (!buffer) {
+        jerry_value_free(data_val);
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
     }
 
-    jerry_arraybuffer_read(args[0], 0, (uint8_t *)src_buffer, src_size);
+    jerry_arraybuffer_read(data_val, 0, (uint8_t *)buffer, buffer_size);
+    jerry_value_free(data_val);
 
+    // Create image descriptor
+    static lv_img_dsc_t img_dsc;
+    memset(&img_dsc, 0, sizeof(img_dsc));
+    img_dsc.header.always_zero = 0;
+    img_dsc.header.w = width;
+    img_dsc.header.h = height;
+    img_dsc.header.cf = LV_IMG_CF_TRUE_COLOR;
+    img_dsc.data_size = buffer_size;
+    img_dsc.data = (const uint8_t *)buffer;
+
+    /* store img_src pointer into user data */
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     if(user_data != NULL){
-       user_data->img_src = src_buffer;
+       /* this prevents from set src second time */
+       if(user_data->img_src != NULL)
+       {
+           free(user_data->img_src);
+       }
+       user_data->img_src = buffer;
     }
 
-    printf("Pass 1\n");
-
-    lv_img_set_src(obj, src_buffer);
-    
-    printf("Pass 2\n");
+    lv_img_set_src(obj, &img_dsc);
 
     return jerry_undefined();
 }
@@ -353,7 +395,6 @@ static jerry_value_t js_lv_img_set_size_mode(const jerry_call_info_t *call_info_
 static jerry_value_t js_lv_img_get_src(const jerry_call_info_t *call_info_p,
                                        const jerry_value_t args[],
                                        const jerry_length_t args_count) {
-    printf("%s %s\n", LV_OBJ_NAME, __FUNCTION__);                                            
     JERRY_GET_NATIVE_PTR(lv_obj_t, obj, call_info_p->this_value, &jerry_obj_native_info);
     if (obj == NULL) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Invalid image object");
@@ -364,10 +405,28 @@ static jerry_value_t js_lv_img_get_src(const jerry_call_info_t *call_info_p,
         return jerry_undefined();
     }
 
-    jerry_value_t js_src = jerry_object();
-    jerry_object_set_native_ptr(js_src, &jerry_obj_native_info, (void *)src);
+    const lv_img_dsc_t *img_dsc = (const lv_img_dsc_t *)src;
+    if (img_dsc->data == NULL || img_dsc->data_size == 0) {
+        return jerry_undefined();
+    }
 
-    return js_src;
+    size_t struct_size = sizeof(lv_img_dsc_t);
+    size_t total_size = struct_size + img_dsc->data_size;
+
+    void *buffer = malloc(total_size);
+    if (!buffer) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Memory allocation failed");
+    }
+
+    memcpy(buffer, img_dsc, struct_size);
+    memcpy((uint8_t *)buffer + struct_size, img_dsc->data, img_dsc->data_size);
+
+    jerry_value_t js_buffer = jerry_arraybuffer(total_size);
+    jerry_arraybuffer_write(js_buffer, 0, (const uint8_t *)buffer, total_size);
+
+    free(buffer);
+
+    return js_buffer;
 }
 
 static jerry_value_t js_lv_img_get_offset_x(const jerry_call_info_t *call_info_p,
@@ -489,10 +548,10 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
         JERRYX_PROPERTY_FUNCTION ("getOffsetX",   js_lv_img_get_offset_x),
         JERRYX_PROPERTY_FUNCTION ("getOffsetY",   js_lv_img_get_offset_y),
         JERRYX_PROPERTY_FUNCTION ("getAngle",     js_lv_img_get_angle),
-        JERRYX_PROPERTY_FUNCTION ("getPivot",     js_lv_img_get_pivot),        
+        JERRYX_PROPERTY_FUNCTION ("getPivot",     js_lv_img_get_pivot),
         JERRYX_PROPERTY_FUNCTION ("getZoom",      js_lv_img_get_zoom),
         JERRYX_PROPERTY_FUNCTION ("getAntialias", js_lv_img_get_antialias),
-        JERRYX_PROPERTY_FUNCTION ("getSizeMode",  js_lv_img_get_size_mode),        
+        JERRYX_PROPERTY_FUNCTION ("getSizeMode",  js_lv_img_get_size_mode),
         JERRYX_PROPERTY_LIST_END(),
     };
 

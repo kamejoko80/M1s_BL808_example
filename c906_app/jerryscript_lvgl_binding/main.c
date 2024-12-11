@@ -345,7 +345,6 @@ void jerryscript_lvgl_demo(void)
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
-        "const img = new Img(screen);\n"
         "const width = 50;\n"
         "const height = 50;\n"
         "const bufferSize = width * height * 2;\n"
@@ -358,24 +357,28 @@ void jerryscript_lvgl_demo(void)
                 "imgView[index] = color & 0xFF;\n"
                 "imgView[index + 1] = (color >> 8) & 0xFF;\n"
             "}\n"
-        "}\n"        
-        "img.setSrc(imgBuffer);\n"
-        "img.setSize(width, height);\n"
+        "}\n"
+        "const src = [width, height, imgBuffer];\n"
+        "const img = new Img(screen);\n"
+        "img.setSrc(src);\n"
         "img.align(LV_ALIGN_CENTER, 0, 0);\n"
-        "img.setSrc(imgSrc);\n"
-        "const retrievedSrc = img.getSrc();\n";
-        
-        
-/*         "const retrievedSrc = img.getSrc();\n"
-        "if (retrievedSrc instanceof ArrayBuffer) {\n"
-            "const retrievedView = new Uint8Array(retrievedSrc);\n"
-            "print('Image source retrieved successfully. Data:');\n"
-            "for (let i = 0; i < retrievedView.length && i < 16; i++) {\n"
+        "// test getSrc()\n"
+        "const retrievedBuffer = img.getSrc();\n"
+        "if (retrievedBuffer instanceof ArrayBuffer) {\n"
+            "const retrievedView = new Uint8Array(retrievedBuffer);\n"
+            "// Example size of lv_img_dsc_t, depends on your system\n"    
+            "const structSize = 16;\n" 
+            "print('Image metadata:');\n"
+            "for (let i = 0; i < structSize; i++) {\n"
                 "print(`Byte ${i}: ${retrievedView[i]}`);\n"
             "}\n"
+            "print('Image data (first 16 bytes):');\n"
+            "for (let i = structSize; i < structSize + 16 && i < retrievedView.length; i++) {\n"
+                "print(`Byte ${i - structSize}: ${retrievedView[i]}`);\n"
+            "}\n"
         "} else {\n"
-            "print('Failed to retrieve image source.');\n"
-        "}\n";    */   
+            "print('Failed to retrieve the image source.');\n"
+        "}\n";        
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -599,40 +602,42 @@ void create_dropdown_with_symbol(void) {
     lv_dropdown_set_options_static(dropdown, opts);
 }
 
+extern void execute_launcher(void);
+
 void test_lv_img_with_buffer(void) {
     const lv_coord_t width = 50;
     const lv_coord_t height = 50;
     const size_t buffer_size = width * height * 2; // RGB565 format (2 bytes per pixel)
 
-    // Allocate a buffer for the image source
-    static lv_color_t img_buffer[50 * 50];
+    static uint8_t img_buffer[50 * 50 * 2]; // Raw buffer for the image
 
     // Fill the buffer with a gradient pattern
     for (lv_coord_t y = 0; y < height; y++) {
         for (lv_coord_t x = 0; x < width; x++) {
-            img_buffer[y * width + x] = lv_color_make(0, 255, 0);
+            uint16_t color = ((x & 0x1F) << 11) | ((y & 0x3F) << 5) | (x & 0x1F); // RGB565
+            size_t index = (y * width + x) * 2;
+            img_buffer[index] = color & 0xFF;          // Low byte
+            img_buffer[index + 1] = (color >> 8) & 0xFF; // High byte
         }
     }
 
-    // Create an image object
-    lv_obj_t *img = lv_img_create(lv_scr_act());
-
-    // Set the image source
-    lv_img_dsc_t img_dsc = {
+    // Define the image descriptor
+    static lv_img_dsc_t img_dsc = {
         .header.always_zero = 0,
         .header.w = width,
         .header.h = height,
         .header.cf = LV_IMG_CF_TRUE_COLOR,
         .data_size = buffer_size,
-        .data = (const uint8_t *)img_buffer,
+        .data = img_buffer,
     };
+
+    // Create an image object
+    lv_obj_t *img = lv_img_create(lv_scr_act());
     lv_img_set_src(img, &img_dsc);
 
     // Align the image to the center of the screen
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 }
-
-extern void execute_launcher(void);
 
 void main()
 {
@@ -642,7 +647,7 @@ void main()
 
     printf("Execute jerryscript demo\r\n");
 
-    //jerryscript_lvgl_demo();
+    jerryscript_lvgl_demo();
     //create_button_matrix();
     //lvgl_canvas_demo();
     //lv_canvas_draw_img_demo();
@@ -650,7 +655,7 @@ void main()
     //lv_canvas_draw_arc_demo();
     //execute_launcher();
     //create_dropdown_with_symbol();
-    test_lv_img_with_buffer();
+    //test_lv_img_with_buffer();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);

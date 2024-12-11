@@ -227,6 +227,10 @@ static jerry_value_t js_lv_checkbox_set_text_static(const jerry_call_info_t *cal
     /* store the static text in user data */
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     if(user_data != NULL){
+        /* this avoid memory leakage */
+        if (user_data->static_text != NULL) {
+            free(user_data->static_text);
+        }
         user_data->static_text = text;
     }
 

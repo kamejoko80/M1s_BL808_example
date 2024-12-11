@@ -43,6 +43,19 @@ typedef void (*jr_clear_user_data_cb_t)(lv_obj_t *obj);
         jerry_value_free(val);\
     } while (0)
 
+#define GET_FIELD_FROM_OBJ(js_obj, field_name, target_var, type) \
+    do { \
+        jerry_value_t field_key = jerry_string_sz(field_name); \
+        jerry_value_t field_val = jerry_object_get(js_obj, field_key); \
+        jerry_value_free(field_key); \
+        if (!jerry_value_is_number(field_val)) { \
+            jerry_value_free(field_val); \
+            return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected '" field_name "' field as number"); \
+        } \
+        target_var = (type)jerry_value_as_number(field_val); \
+        jerry_value_free(field_val); \
+    } while (0)
+
 void jr_set_prop_list(jerry_value_t prop_obj, jerryx_property_entry *methods);
 void jr_lvgl_obj_desctruct(lv_obj_t *obj, jr_clear_user_data_cb_t callback);
 void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries);

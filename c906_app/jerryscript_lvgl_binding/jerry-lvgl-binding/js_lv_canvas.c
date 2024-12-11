@@ -69,7 +69,9 @@ static void js_lv_clear_user_data_cb(lv_obj_t *obj) {
 
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     if (user_data != NULL) {
-
+        if (user_data->buf != NULL) {
+            free(user_data->buf);
+        }
         free(user_data);
         lv_obj_set_user_data(obj, NULL);
     }
@@ -207,6 +209,11 @@ static jerry_value_t js_lv_obj_set_buffer(const jerry_call_info_t *call_info_p,
     /* store buffer pointer into user data */
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     if(user_data != NULL){
+       /* this avoid memory leakage */ 
+       if(user_data->buf != NULL)
+       {
+           free(user_data->buf);
+       }
         user_data->buf = buf;
     }
 

@@ -111,6 +111,10 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
     /* later we can set user data as bellow */
     // jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     // if(user_data != NULL){
+    //    /* this avoid memory leakage */    
+    //    if (user_data->name != NULL) {
+    //        free(user_data->name);
+    //    }  
     //    user_data->value = 1;
     //    user_data->name = strdup("Some text");
     // }

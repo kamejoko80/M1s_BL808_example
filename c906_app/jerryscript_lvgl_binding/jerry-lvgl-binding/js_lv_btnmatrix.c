@@ -106,6 +106,13 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to create button");
     }
 
+    /* user data setting */
+    jerry_lv_user_data_t *user_data = malloc(sizeof(jerry_lv_user_data_t));
+    if(user_data == NULL) {
+        return jerry_throw_sz(JERRY_ERROR_TYPE, "Failed to allocate userdata");
+    }
+    lv_obj_set_user_data(obj, user_data);
+
     jerry_object_set_native_ptr(call_info_p->this_value, /* jerry_value_t object */
                                 &jerry_obj_native_info,  /* const jerry_object_native_info_t *native_info_p */
                                 obj                      /* void *native_pointer_p */
@@ -202,10 +209,20 @@ static jerry_value_t js_lv_obj_set_map(const jerry_call_info_t *call_info_p,
     lv_btnmatrix_set_map(obj, (const char **)map);
 
     /* save user data */
-    jerry_lv_user_data_t *user_data = malloc(sizeof(jerry_lv_user_data_t));
-    user_data->map_len = len;
-    user_data->map = map;
-    lv_obj_set_user_data(obj, user_data);
+    jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
+    if(user_data != NULL){
+        /* this avoid memory leakage */ 
+        if (user_data->map != NULL) {
+            for (uint32_t i = 0; i < user_data->map_len; i++) {
+                if (user_data->map[i] != NULL) {
+                    free((void *)user_data->map[i]);
+                }
+            }
+            free(user_data->map);
+        }
+        user_data->map_len = len;
+        user_data->map = map;
+    }
 
     return jerry_undefined();
 
