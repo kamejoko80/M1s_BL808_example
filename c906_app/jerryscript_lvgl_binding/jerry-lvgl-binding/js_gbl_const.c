@@ -173,6 +173,8 @@ static const jerry_const_entry_t jerry_constant_entry_list[] = {
     JERRY_CONST_ENTRY("LV_CHECKBOX_DRAW_PART_BOX",         LV_CHECKBOX_DRAW_PART_BOX        ),
     JERRY_CONST_ENTRY("LV_IMG_SIZE_MODE_VIRTUAL",          LV_IMG_SIZE_MODE_VIRTUAL         ),
     JERRY_CONST_ENTRY("LV_IMG_SIZE_MODE_REAL",             LV_IMG_SIZE_MODE_REAL            ),
+    JERRY_CONST_ENTRY("LV_ROLLER_MODE_NORMAL",             LV_ROLLER_MODE_NORMAL            ),
+    JERRY_CONST_ENTRY("LV_ROLLER_MODE_INFINITE",           LV_ROLLER_MODE_INFINITE          ),
     JERRY_CONST_LIST_END(),
 };
 

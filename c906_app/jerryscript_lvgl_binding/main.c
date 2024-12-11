@@ -38,6 +38,7 @@
 #include "js_lv_dropdown.h"
 #include "js_lv_img.h"
 #include "js_lv_line.h"
+#include "js_lv_roller.h"
 
 static void lvgl_task(void *param)
 {
@@ -382,7 +383,7 @@ void jerryscript_lvgl_demo(void)
         "}\n";
 #endif
 
-#if 1 /* Test line */
+#if 0 /* Test line */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -403,6 +404,32 @@ void jerryscript_lvgl_demo(void)
         "}\n";
 #endif
 
+#if 1 /* Test roller */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let roller = new Roller(screen);\n"
+        "roller.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "roller.setSize(200, 200);\n"
+        "roller.setOptions('Option 1\\nOption 2\\nOption 3\\nOption 4', LV_ROLLER_MODE_NORMAL);\n"
+        "roller.setSelected(1, LV_ANIM_ON);\n"
+        "roller.setVisibleRowCount(2);\n"
+        "const selectedIndex = roller.getSelected();\n"
+        "print('Selected index:', selectedIndex);\n"
+        "const selectedStr = roller.getSelectedStr();\n"
+        "print('Selected option:', selectedStr);\n"
+        "const options = roller.getOptions();\n"
+        "print('Options:', options);\n"
+        "const optionCount = roller.getOptionCnt();\n"
+        "print('Option count:', optionCount);\n"
+        "roller.onChanged(function(e){\n"
+            "const selected_index = roller.getSelected();\n"
+            "const selected_str = roller.getSelectedStr();\n"
+            "print('Selected index:', selected_index);\n"
+            "print('Selected option:', selected_str);\n"
+        "});\n";
+#endif
+
     const jerry_length_t script_size = sizeof (script) - 1;
 
     /* Initialize engine */
@@ -421,6 +448,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_dropdown_init();
     jr_lv_img_init();
     jr_lv_line_init();
+    jr_lv_roller_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
@@ -662,8 +690,7 @@ void test_lv_img_with_buffer(void) {
     lv_obj_align(img, LV_ALIGN_CENTER, 0, 0);
 }
 
-void lv_example_line(void)
-{
+void lv_example_line(void) {
     /*Create an array for the points of the line*/
     static lv_point_t line_points[] = { {5, 5}, {70, 70}, {120, 10}, {180, 60}, {240, 10} };
 
@@ -680,6 +707,27 @@ void lv_example_line(void)
     lv_line_set_points(line, line_points, 5);     /*Set the points*/
     lv_obj_add_style(line, &style_line, 0);
     lv_obj_center(line);
+}
+
+void create_roller(void) {
+    // Create a roller object
+    lv_obj_t *roller = lv_roller_create(lv_scr_act());
+    lv_roller_set_options(roller, "Option 1\nOption 2\nOption 3\nOption 4", LV_ROLLER_MODE_NORMAL);
+    lv_obj_align(roller, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size(roller, 200, 200);
+    lv_roller_set_selected(roller, 1, LV_ANIM_ON);
+    lv_roller_set_visible_row_count(roller, 2);
+    uint16_t selected_index = lv_roller_get_selected(roller);
+    printf("Selected index: %d\n", selected_index);
+    char selected_str[256];
+    lv_roller_get_selected_str(roller, selected_str, sizeof(selected_str));
+    printf("Selected option: %s\n", selected_str);
+    const char *options = lv_roller_get_options(roller);
+    if (options) {
+        printf("Options:\n%s\n", options);
+    }
+    uint16_t option_count = lv_roller_get_option_cnt(roller);
+    printf("Option count: %d\n", option_count);
 }
 
 void main()
@@ -700,6 +748,7 @@ void main()
     //create_dropdown_with_symbol();
     //test_lv_img_with_buffer();
     //lv_example_line();
+    //create_roller();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);
