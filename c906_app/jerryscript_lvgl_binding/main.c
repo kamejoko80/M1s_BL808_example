@@ -42,6 +42,7 @@
 #include "js_lv_slider.h"
 #include "js_lv_switch.h"
 #include "js_lv_table.h"
+#include "js_lv_textarea.h"
 
 static void lvgl_task(void *param)
 {
@@ -534,6 +535,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_slider_init();
     jr_lv_switch_init();
     jr_lv_table_init();
+    jr_lv_textarea_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
