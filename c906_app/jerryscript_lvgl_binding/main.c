@@ -39,6 +39,7 @@
 #include "js_lv_img.h"
 #include "js_lv_line.h"
 #include "js_lv_roller.h"
+#include "js_lv_slider.h"
 
 static void lvgl_task(void *param)
 {
@@ -404,7 +405,7 @@ void jerryscript_lvgl_demo(void)
         "}\n";
 #endif
 
-#if 1 /* Test roller */
+#if 0 /* Test roller */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -430,6 +431,39 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
+#if 1 /* Test slider */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let slider = new Slider(screen);\n"
+        "slider.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "slider.setSize(200, 20);\n"
+        "slider.setRange(0, 100);\n"
+        "slider.setValue(50, LV_ANIM_OFF);\n"
+        "slider.setMode(LV_SLIDER_MODE_RANGE);\n"
+        "slider.setLeftValue(10, LV_ANIM_OFF);\n"
+        "print('Left Value:', slider.getLeftValue());\n"
+        "let minValue = slider.getMinValue();\n"
+        "let maxValue = slider.getMaxValue();\n"
+        "let currentValue = slider.getValue();\n"
+        "print('Slider Min Value:', minValue);\n"
+        "print('Slider Max Value:', maxValue);\n"
+        "print('Slider Current Value:', currentValue);\n"
+        "let mode = slider.getMode();\n"
+        "print('Slider Mode:', mode === LV_SLIDER_MODE_NORMAL ? 'NORMAL' : 'RANGE');\n"
+        "slider.onChanged(function(e){\n"
+            "if (e === LV_EVENT_VALUE_CHANGED) {\n"
+                "let value = slider.getValue();\n"
+                "print('Slider value changed:', value);\n"
+            "}\n"
+            "if (e === LV_EVENT_PRESSED) {\n"
+                "print('Slider dragging started.');\n"
+            "} else if (e === LV_EVENT_RELEASED) {\n"
+                "print('Slider dragging stopped.');\n"
+            "}\n"
+        "});\n";
+#endif
+
     const jerry_length_t script_size = sizeof (script) - 1;
 
     /* Initialize engine */
@@ -449,6 +483,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_img_init();
     jr_lv_line_init();
     jr_lv_roller_init();
+    jr_lv_slider_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
