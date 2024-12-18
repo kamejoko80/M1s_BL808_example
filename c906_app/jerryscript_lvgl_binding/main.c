@@ -40,6 +40,7 @@
 #include "js_lv_line.h"
 #include "js_lv_roller.h"
 #include "js_lv_slider.h"
+#include "js_lv_switch.h"
 
 static void lvgl_task(void *param)
 {
@@ -431,7 +432,7 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
-#if 1 /* Test slider */
+#if 0 /* Test slider */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -464,6 +465,24 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
+#if 1 /* Test slider */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let sw = new Switch(screen);\n"
+        "sw.align(LV_ALIGN_CENTER, 0, -30);\n"
+        "sw.setState(false);\n"
+        "let label = new Label(screen);\n"
+        "label.align(LV_ALIGN_CENTER, 0, 30);\n"
+        "label.setText('State: OFF');\n"
+        "sw.onChanged(function(e){\n"
+            "if (e === LV_EVENT_VALUE_CHANGED) {\n"
+                "let state = sw.getState();\n"
+                "label.setText('State: ' + (state ? 'ON' : 'OFF'));\n"
+            "}\n"
+        "});\n";
+#endif
+
     const jerry_length_t script_size = sizeof (script) - 1;
 
     /* Initialize engine */
@@ -484,6 +503,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_line_init();
     jr_lv_roller_init();
     jr_lv_slider_init();
+    jr_lv_switch_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
