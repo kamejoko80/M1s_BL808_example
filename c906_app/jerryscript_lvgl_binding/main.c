@@ -41,6 +41,7 @@
 #include "js_lv_roller.h"
 #include "js_lv_slider.h"
 #include "js_lv_switch.h"
+#include "js_lv_table.h"
 
 static void lvgl_task(void *param)
 {
@@ -465,7 +466,7 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
-#if 1 /* Test slider */
+#if 0 /* Test switch */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -479,6 +480,34 @@ void jerryscript_lvgl_demo(void)
             "if (e === LV_EVENT_VALUE_CHANGED) {\n"
                 "let state = sw.getState();\n"
                 "label.setText('State: ' + (state ? 'ON' : 'OFF'));\n"
+            "}\n"
+        "});\n";
+#endif
+
+#if 1 /* Test switch */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let table = new Table(screen);\n"
+        "table.setRowCnt(3);\n"
+        "table.setColCnt(3);\n"
+        "table.setColWidth(0, 100);\n"
+        "table.setColWidth(1, 100);\n"
+        "table.setColWidth(2, 100);\n"
+        "table.setCellValue(0, 0, 'Header 1');\n"
+        "table.setCellValue(0, 1, 'Header 2');\n"
+        "table.setCellValue(0, 2, 'Header 3');\n"
+        "table.setCellValue(1, 0, 'Row 1, Col 1');\n"
+        "table.setCellValue(1, 1, 'Row 1, Col 2');\n"
+        "table.setCellValue(1, 2, 'Row 1, Col 3');\n"
+        "table.onClicked(function(e){\n"
+            "if (e === LV_EVENT_CLICKED) {\n"
+                "print('Table clicked.');\n"
+                "let selectedRow = { value: 0 };\n"
+                "let selectedCol = { value: 0 };\n"
+                "table.getSelectedCell(selectedRow, selectedCol);\n"
+                "let cellValue = table.getCellValue(selectedRow.value, selectedCol.value);\n"
+                "print(`Selected cell: Row ${selectedRow.value}, Col ${selectedCol.value}, Value: ${cellValue}`);\n"
             "}\n"
         "});\n";
 #endif
@@ -504,6 +533,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_roller_init();
     jr_lv_slider_init();
     jr_lv_switch_init();
+    jr_lv_table_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
@@ -785,6 +815,46 @@ void create_roller(void) {
     printf("Option count: %d\n", option_count);
 }
 
+static void table_event_cb(lv_event_t *e) {
+    lv_obj_t *table = lv_event_get_target(e);
+
+    if (lv_event_get_code(e) == LV_EVENT_CLICKED) {
+        printf("Table clicked.\n");
+
+        // Get selected cell
+        uint16_t row, col;
+        lv_table_get_selected_cell(table, &row, &col);
+
+        // Get the cell's value
+        const char *cell_value = lv_table_get_cell_value(table, row, col);
+        printf("Selected cell: Row %d, Col %d, Value: %s\n", row, col, cell_value);
+    } else {
+        printf("Unhandled event: %d\n", lv_event_get_code(e));
+    }
+}
+
+void lv_table_demo(void)
+{
+    lv_obj_t *scr = lv_scr_act();
+    lv_obj_t *table = lv_table_create(scr);
+
+    lv_table_set_row_cnt(table, 3);
+    lv_table_set_col_cnt(table, 3);
+
+    lv_table_set_col_width(table, 0, 100);
+    lv_table_set_col_width(table, 1, 100);
+    lv_table_set_col_width(table, 2, 100);
+
+    lv_table_set_cell_value(table, 0, 0, "Header 1");
+    lv_table_set_cell_value(table, 0, 1, "Header 2");
+    lv_table_set_cell_value(table, 0, 2, "Header 3");
+    lv_table_set_cell_value(table, 1, 0, "Row 1, Col 1");
+    lv_table_set_cell_value(table, 1, 1, "Row 1, Col 2");
+    lv_table_set_cell_value(table, 1, 2, "Row 1, Col 3");
+
+    lv_obj_add_event_cb(table, table_event_cb, LV_EVENT_CLICKED, NULL);
+}
+
 void main()
 {
     lv_init();
@@ -804,6 +874,7 @@ void main()
     //test_lv_img_with_buffer();
     //lv_example_line();
     //create_roller();
+    //lv_table_demo();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);

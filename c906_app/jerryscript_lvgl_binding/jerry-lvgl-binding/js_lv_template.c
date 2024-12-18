@@ -169,9 +169,9 @@ static jerry_value_t js_lv_obj_set_size(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
-                                        const jerry_value_t args[],
-                                        const jerry_length_t args_count) {
+static jerry_value_t js_lv_obj_on_changed(const jerry_call_info_t *call_info_p,
+                                          const jerry_value_t args[],
+                                          const jerry_length_t args_count) {
     if (args_count < 1 || !jerry_value_is_function(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected a callback function");
     }
@@ -181,7 +181,7 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
        return jerry_undefined();
     }
 
-    lv_obj_add_event_cb(obj, js_lv_obj_event_cb, LV_EVENT_CLICKED, (void *)(uintptr_t)args[0]);
+    lv_obj_add_event_cb(obj, js_lv_obj_event_cb, LV_EVENT_VALUE_CHANGED, (void *)(uintptr_t)args[0]);
 
     return jerry_undefined();
 }
@@ -194,9 +194,9 @@ static void jr_lv_obj_class_register(jerry_external_handler_t constructor_handle
 
     jerryx_property_entry methods[] =
     {
-        JERRYX_PROPERTY_FUNCTION ("align",   js_lv_obj_align),
-        JERRYX_PROPERTY_FUNCTION ("setSize", js_lv_obj_set_size),
-        JERRYX_PROPERTY_FUNCTION ("onPress", js_lv_obj_on_press),
+        JERRYX_PROPERTY_FUNCTION ("align",     js_lv_obj_align),
+        JERRYX_PROPERTY_FUNCTION ("setSize",   js_lv_obj_set_size),
+        JERRYX_PROPERTY_FUNCTION ("onChanged", js_lv_obj_on_changed),
         JERRYX_PROPERTY_LIST_END(),
     };
 
