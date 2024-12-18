@@ -422,9 +422,9 @@ void jerryscript_lvgl_demo(void)
         "print('Options:', options);\n"
         "const optionCount = roller.getOptionCnt();\n"
         "print('Option count:', optionCount);\n"
-        "roller.onChanged(function(obj, e){\n"
-            "const selected_index = obj.getSelected();\n"
-            "const selected_str = obj.getSelectedStr();\n"
+        "roller.onChanged(function(e){\n"
+            "const selected_index = roller.getSelected();\n"
+            "const selected_str = roller.getSelectedStr();\n"
             "print('Selected index:', selected_index);\n"
             "print('Selected option:', selected_str);\n"
         "});\n";

@@ -49,7 +49,6 @@ typedef struct {
 *************************************************************************/
 
 static void js_lv_obj_event_cb(lv_event_t *e) {
-
     /* Get the JavaScript callback from the user data */
     jerry_value_t js_callback = (jerry_value_t)(uintptr_t)lv_event_get_user_data(e);
 
@@ -66,7 +65,6 @@ static void js_lv_obj_event_cb(lv_event_t *e) {
 *************************************************************************/
 
 static void js_lv_clear_user_data_cb(lv_obj_t *obj) {
-
     jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     if (user_data != NULL) {
         if (user_data->name != NULL) {
@@ -111,10 +109,10 @@ static jerry_value_t js_lv_obj_constructor(const jerry_call_info_t *call_info_p,
     /* later we can set user data as bellow */
     // jerry_lv_user_data_t *user_data = (jerry_lv_user_data_t *)lv_obj_get_user_data(obj);
     // if(user_data != NULL){
-    //    /* this avoid memory leakage */    
+    //    /* this avoid memory leakage */
     //    if (user_data->name != NULL) {
     //        free(user_data->name);
-    //    }  
+    //    }
     //    user_data->value = 1;
     //    user_data->name = strdup("Some text");
     // }
@@ -183,7 +181,6 @@ static jerry_value_t js_lv_obj_on_press(const jerry_call_info_t *call_info_p,
        return jerry_undefined();
     }
 
-    // Register the event callback
     lv_obj_add_event_cb(obj, js_lv_obj_event_cb, LV_EVENT_CLICKED, (void *)(uintptr_t)args[0]);
 
     return jerry_undefined();
