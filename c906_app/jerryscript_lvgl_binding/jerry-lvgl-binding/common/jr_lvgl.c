@@ -31,7 +31,7 @@ lv_color_t jr_lvgl_color_to_color_t(uint32_t color) {
 #else
     // Assuming color format is GH B R GL (3-5-5-3)
     lv_color.ch.red = (color >> 3) & 0x1F ;    // 5 bits for red
-    lv_color.ch.green_l = color & 0x7;         // Lower 3 bits of green    
+    lv_color.ch.green_l = color & 0x7;         // Lower 3 bits of green
     lv_color.ch.green_h = (color >> 13) & 0x7; // Upper 3 bits of green
     lv_color.ch.blue = (color >> 8) & 0x1F ;   // 5 bits for blue
 #endif
@@ -47,14 +47,14 @@ lv_color_t jr_lvgl_color_to_color_t(uint32_t color) {
     // printf("color =     %x\n", color);
     // printf("color r:    %x\n", lv_color.ch.red);
     // printf("color gh:   %x\n", lv_color.ch.green_h);
-    // printf("color gl:   %x\n", lv_color.ch.green_l);    
+    // printf("color gl:   %x\n", lv_color.ch.green_l);
     // printf("color b:    %x\n", lv_color.ch.blue);
     // printf("color full: %x\n", lv_color.full);
     return lv_color;
 }
 
 uint32_t jr_lvgl_color_t_to_color(lv_color_t color) {
-    return color.full;   
+    return color.full;
 }
 
 /* This function allocates memory, please free the text pointer after using it */
@@ -119,6 +119,22 @@ void jr_register_global_constant_list(jerry_value_t global_obj, const jerry_cons
     {
         jerry_value_t name = jerry_string_sz(entries[idx].name);
         jerry_value_t value = jerry_number(entries[idx].value);
+        jerry_value_t set_result = jerry_object_set(global_obj, name, value);
+        if(jerry_value_is_exception(set_result)) {
+            printf("Failed register global %s constant\n", entries[idx].name);
+        }
+        jerry_value_free(set_result);
+        jerry_value_free(value);
+        jerry_value_free(name);
+    }
+}
+
+void jr_register_global_str_constant_list(jerry_value_t global_obj, const jerry_str_const_entry_t *entries)
+{
+    for (uint32_t idx = 0; (entries[idx].name != NULL); idx++)
+    {
+        jerry_value_t name = jerry_string_sz(entries[idx].name);
+        jerry_value_t value = jerry_string_sz(entries[idx].value);
         jerry_value_t set_result = jerry_object_set(global_obj, name, value);
         if(jerry_value_is_exception(set_result)) {
             printf("Failed register global %s constant\n", entries[idx].name);

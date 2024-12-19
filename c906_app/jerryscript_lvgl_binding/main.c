@@ -43,6 +43,7 @@
 #include "js_lv_switch.h"
 #include "js_lv_table.h"
 #include "js_lv_textarea.h"
+#include "js_lv_win.h"
 
 static void lvgl_task(void *param)
 {
@@ -513,7 +514,7 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
-#if 1 /* Test textarea */
+#if 0 /* Test textarea */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -529,6 +530,26 @@ void jerryscript_lvgl_demo(void)
         "textarea.setCursorPos(0);\n"
         "textarea.delCharForward();\n"
         "print('After delCharForward():', textarea.getText());\n";
+#endif
+
+#if 1 /* Test win */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let win = new Win(screen, 50);\n"
+        "let title = win.addTitle('My Window Title');\n"
+        "print('Title added to window.');\n"
+        "let btn = win.addBtn(LV_SYMBOL_HOME, 40);\n"
+        "print('Close button added to window header.');\n"
+        "let header = win.getHeader();\n"
+        "if (header !== undefined) {\n"
+            "print('Header retrieved successfully.');\n"
+            /* "header.setStyle(LV_STYLE_BG_COLOR, lv_color_make(0, 128, 255));\n" */
+        "}\n"
+        "let content = win.getContent();\n"
+        "if (content !== undefined) {\n"
+            "print('Content area retrieved successfully.');\n"
+        "}\n"; 
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -554,6 +575,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_switch_init();
     jr_lv_table_init();
     jr_lv_textarea_init();
+    jr_lv_win_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
