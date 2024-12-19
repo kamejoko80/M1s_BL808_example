@@ -186,9 +186,6 @@ static jerry_value_t js_lv_obj_on_changed(const jerry_call_info_t *call_info_p,
     return jerry_undefined();
 }
 
-
-
-
 static jerry_value_t js_lv_textarea_add_char(const jerry_call_info_t *call_info_p, const jerry_value_t args[], const jerry_length_t args_count) {
     if (args_count < 1 || !jerry_value_is_number(args[0])) {
         return jerry_throw_sz(JERRY_ERROR_TYPE, "Expected (char)");

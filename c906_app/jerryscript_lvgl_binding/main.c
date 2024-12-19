@@ -485,7 +485,7 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
-#if 1 /* Test switch */
+#if 0 /* Test switch */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -511,6 +511,24 @@ void jerryscript_lvgl_demo(void)
                 "print(`Selected cell: Row ${selectedRow.value}, Col ${selectedCol.value}, Value: ${cellValue}`);\n"
             "}\n"
         "});\n";
+#endif
+
+#if 1 /* Test textarea */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let textarea = new TextArea(screen);\n"
+        "textarea.setSize(200, 100);\n"
+        "textarea.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "textarea.setText('Initial Text');\n"
+        "textarea.addChar(65);\n"
+        "textarea.addChar(66);\n"
+        "print('TextArea after adding chars:', textarea.getText());\n"
+        "textarea.delChar();\n"
+        "print('After delChar():', textarea.getText());\n"
+        "textarea.setCursorPos(0);\n"
+        "textarea.delCharForward();\n"
+        "print('After delCharForward():', textarea.getText());\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
