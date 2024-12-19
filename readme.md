@@ -51,7 +51,22 @@
     ./build.sh hello_world
     ```
 
-5. The compilation is complete, and the target file is saved in the `build_out` path
+6. Work around compile error:
+
+    For unknown reason, the compilation error happens in the first build, we can follow the below steps for a work around solution:
+
+    6.1 Edit file M1s_BL808_SDK/components/jerryscript/bouffalo.mk -> comment out all variable named COMPONENT_ADD_INCLUDEDIRS to exclude the header paths
+
+    6.2 Build hello_work project, although building will fail but we should run at least 3 times:
+
+    ```shell
+    ./build.sh hello_world
+    ```
+
+    6.3 Edit file M1s_BL808_SDK/components/jerryscript/bouffalo.mk -> Enable the variable named COMPONENT_ADD_INCLUDEDIRS to include the header paths, then execute build app commands again.
+
+
+7. The compilation is complete, and the target file is saved in the `build_out` path
 
 ##  Flash Guide
 
