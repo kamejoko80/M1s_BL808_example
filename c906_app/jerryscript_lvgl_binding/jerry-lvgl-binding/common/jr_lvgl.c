@@ -113,6 +113,28 @@ void jr_register_cfunc_list(const jerry_cfunc_entry_t *entries) {
     jerry_value_free(global_object);
 }
 
+void jr_register_obj_method(const jerry_value_t obj, const jerry_cfunc_entry_t *entries) {
+    jerry_value_t constructor = jerry_object_get(obj, jerry_string_sz("constructor"));
+    if (jerry_value_is_function(constructor)) {
+        jerry_value_t prototype = jerry_object_get(constructor, jerry_string_sz("prototype"));
+        if (jerry_value_is_object(prototype)) {
+            for (uint32_t idx = 0; (entries[idx].cfunc_name != NULL); idx++) {
+                jerry_value_t method_name = jerry_string_sz(entries[idx].cfunc_name);
+                jerry_value_t method_func = jerry_function_external(entries[idx].cfunc_handler);
+                jerry_value_t set_result = jerry_object_set(prototype, method_name, method_func);
+                if(jerry_value_is_exception(set_result)) {
+                    printf("Failed register %s function\n", entries[idx].cfunc_name);
+                }
+                jerry_value_free(set_result);
+                jerry_value_free(method_name);
+                jerry_value_free(method_func);
+            }
+        }
+        jerry_value_free(prototype);
+    }
+    jerry_value_free(constructor);
+}
+
 void jr_register_global_constant_list(jerry_value_t global_obj, const jerry_const_entry_t *entries)
 {
     for (uint32_t idx = 0; (entries[idx].name != NULL); idx++)

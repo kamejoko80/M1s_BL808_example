@@ -185,7 +185,17 @@ static const jerry_const_entry_t jerry_constant_entry_list[] = {
     JERRY_CONST_ENTRY("LV_TABLE_CELL_CTRL_CUSTOM_1",       LV_TABLE_CELL_CTRL_CUSTOM_1      ),
     JERRY_CONST_ENTRY("LV_TABLE_CELL_CTRL_CUSTOM_2",       LV_TABLE_CELL_CTRL_CUSTOM_2      ),
     JERRY_CONST_ENTRY("LV_TABLE_CELL_CTRL_CUSTOM_3",       LV_TABLE_CELL_CTRL_CUSTOM_3      ),
-    JERRY_CONST_ENTRY("LV_TABLE_CELL_CTRL_CUSTOM_4",       LV_TABLE_CELL_CTRL_CUSTOM_4      ),
+    JERRY_CONST_ENTRY("LV_TABLE_CELL_CTRL_CUSTOM_4",       LV_TABLE_CELL_CTRL_CUSTOM_4      ),   
+    JERRY_CONST_ENTRY("LV_PART_MAIN",                      LV_PART_MAIN                     ),
+    JERRY_CONST_ENTRY("LV_PART_SCROLLBAR",                 LV_PART_SCROLLBAR                ),
+    JERRY_CONST_ENTRY("LV_PART_INDICATOR",                 LV_PART_INDICATOR                ),
+    JERRY_CONST_ENTRY("LV_PART_KNOB",                      LV_PART_KNOB                     ),
+    JERRY_CONST_ENTRY("LV_PART_SELECTED",                  LV_PART_SELECTED                 ),
+    JERRY_CONST_ENTRY("LV_PART_ITEMS",                     LV_PART_ITEMS                    ),
+    JERRY_CONST_ENTRY("LV_PART_TICKS",                     LV_PART_TICKS                    ),
+    JERRY_CONST_ENTRY("LV_PART_CURSOR",                    LV_PART_CURSOR                   ),
+    JERRY_CONST_ENTRY("LV_PART_CUSTOM_FIRST",              LV_PART_CUSTOM_FIRST             ),
+    JERRY_CONST_ENTRY("LV_PART_ANY",                       LV_PART_ANY                      ),
     JERRY_CONST_LIST_END(),
 };
 

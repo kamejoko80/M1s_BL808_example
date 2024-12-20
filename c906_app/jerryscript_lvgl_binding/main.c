@@ -67,13 +67,18 @@ void jerryscript_lvgl_demo(void)
         "print(myLabel.getText());\n";
 #endif
 
-#if 0 /* Test button */
+#if 1 /* Test button */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
         "let myButton = new Button(screen);\n"
-        "myButton.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myButton.setSize(60, 60);\n"
+        "myButton.setStyle('width', 150, LV_PART_MAIN);\n"
+        "myButton.setStyle('height', 80, LV_PART_MAIN);\n"
+        "myButton.setStyle('bg_color', 0x00FF00, LV_PART_MAIN);\n"
+        "myButton.setStyle('bg_opa', 128, LV_PART_MAIN);\n"
+        "myButton.setStyle('align', LV_ALIGN_CENTER, LV_PART_MAIN);\n"
+        //"myButton.align(LV_ALIGN_CENTER, 0, 0);\n"
         "myButton.onPress(function(event_code){\n"
         "if (event_code === 7) {\n"
         "print('Button clicked!');\n"
@@ -532,7 +537,7 @@ void jerryscript_lvgl_demo(void)
         "print('After delCharForward():', textarea.getText());\n";
 #endif
 
-#if 1 /* Test win */
+#if 0 /* Test win */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -549,7 +554,7 @@ void jerryscript_lvgl_demo(void)
         "let content = win.getContent();\n"
         "if (content !== undefined) {\n"
             "print('Content area retrieved successfully.');\n"
-        "}\n"; 
+        "}\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -897,6 +902,20 @@ void lv_table_demo(void)
     lv_obj_add_event_cb(table, table_event_cb, LV_EVENT_CLICKED, NULL);
 }
 
+void lv_button_style_demo(void)
+{
+    /* Create a screen */
+    lv_obj_t * screen = lv_scr_act();
+
+    /* Create a button */
+    lv_obj_t * btn = lv_btn_create(screen);
+    lv_obj_set_style_width(btn, 120, LV_PART_MAIN);
+    lv_obj_set_style_height(btn, 50, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(btn, lv_color_make(0x00, 0xFF, 0x00), LV_PART_MAIN);
+
+    lv_obj_align(btn, LV_ALIGN_CENTER, 0, 0);
+}
+
 void main()
 {
     lv_init();
@@ -917,6 +936,7 @@ void main()
     //lv_example_line();
     //create_roller();
     //lv_table_demo();
+    //lv_button_style_demo();
 
     lv_task_handler();
     xTaskCreate(lvgl_task, (char *)"lvgl task", 512, NULL, 15, NULL);
