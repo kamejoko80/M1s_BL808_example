@@ -49,7 +49,6 @@ typedef struct {
 *************************************************************************/
 
 static void js_lv_obj_destructor_cb(void *native_p, jerry_object_native_info_t *call_info_p);
-static void js_lv_obj_event_cb(lv_event_t *e);
 
 /************************************************************************
 * Global variable definition

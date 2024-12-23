@@ -44,6 +44,7 @@
 #include "js_lv_table.h"
 #include "js_lv_textarea.h"
 #include "js_lv_win.h"
+#include "js_lv_analogclock.h"
 
 static void lvgl_task(void *param)
 {
@@ -306,7 +307,7 @@ void jerryscript_lvgl_demo(void)
         "chb1.align(LV_ALIGN_TOP_LEFT, 0, 0);\n"
         "chb2.align(LV_ALIGN_BOTTOM_LEFT, 0, 0);\n"
         "chb1.setStyle('bg_color', 0x00FF00, LV_PART_MAIN);\n"
-        "chb2.setStyle('bg_color', 0xFF0000, LV_PART_MAIN);\n"        
+        "chb2.setStyle('bg_color', 0xFF0000, LV_PART_MAIN);\n"
         "chb1.setText('Dynamic Text Example');\n"
         "chb2.setTextStatic('Static Text Example');\n"
         "print(chb1.getText());\n"
@@ -544,7 +545,7 @@ void jerryscript_lvgl_demo(void)
         "print('After delCharForward():', textarea.getText());\n";
 #endif
 
-#if 1 /* Test win */
+#if 0 /* Test win */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -562,6 +563,29 @@ void jerryscript_lvgl_demo(void)
         "if (content !== undefined) {\n"
             "print('Content area retrieved successfully.');\n"
         "}\n";
+#endif
+
+#if 1 /* Test analogclock */
+    const jerry_char_t script[] =
+        "print('LVGL initialization done.');\n"
+        "const screen = lv_scr_act();\n"
+        "let analogClock = new AnalogClock(screen);\n"
+        "analogClock.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "analogClock.setStyle('bg_color', 0xF0B46E, LV_PART_MAIN);\n"
+        "analogClock.setSize(200, 200);\n"
+        "let scale = analogClock.addScale();\n"
+        "analogClock.setScaleRange(scale, 0, 60, 360, 0);\n"
+        "analogClock.setTicks(2, 10, 0x000000);\n"
+        "analogClock.setMajorTicks(3, 15, 0xFF0000, 10);\n"
+        "analogClock.hideDigits(true);\n"
+        "analogClock.setHourNeedleLine(6, 0xFF0000, 10);\n"
+        "analogClock.setMinNeedleLine(4, 0x00FF00, 5);\n"
+        "analogClock.setSecNeedleLine(2, 0x0000FF, 0);\n"
+        "let arc = analogClock.addArc(5, 0x00FFFF, 0);\n"
+        "analogClock.setIndicatorStartValue(arc, 0);\n"
+        "analogClock.setIndicatorEndValue(arc, 15);\n"
+        "analogClock.addScaleLines(0xFF00FF, 0xFFFF00, true, 3);\n"
+        "analogClock.setTime(10, 15, 30);\n";
 #endif
 
     const jerry_length_t script_size = sizeof (script) - 1;
@@ -588,6 +612,7 @@ void jerryscript_lvgl_demo(void)
     jr_lv_table_init();
     jr_lv_textarea_init();
     jr_lv_win_init();
+    jr_lv_analogclock_init();
 
     /* Register the print function in the global object */
     jerryx_register_global("print", jerryx_handler_print);
