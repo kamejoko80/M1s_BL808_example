@@ -147,7 +147,7 @@ static const jerry_cfunc_entry_t methods[] = {
     JERRY_CFUNC_ENTRY("setSize",   js_lv_obj_set_size),
     JERRY_CFUNC_ENTRY("setStyle",  js_lv_obj_set_style),
     JERRY_CFUNC_ENTRY("onChanged", js_lv_obj_on_changed),
-    JERRY_CFUNC_LIST_END() ,
+    JERRY_CFUNC_LIST_END(),
 };
 
 /************************************************************************

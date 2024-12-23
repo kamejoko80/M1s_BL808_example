@@ -67,7 +67,7 @@ void jerryscript_lvgl_demo(void)
         "print(myLabel.getText());\n";
 #endif
 
-#if 1 /* Test button */
+#if 0 /* Test button */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -128,6 +128,7 @@ void jerryscript_lvgl_demo(void)
         "btnm.setMap(btn_map);\n"
         "btnm.setSize(250, 170);\n"
         "btnm.align(LV_ALIGN_CENTER, 0, 0);"
+        "btnm.setStyle('bg_color', 0x00FF00, LV_PART_MAIN);\n"
         "btnm.onChanged(function(e){\n"
             "const btn_id = btnm.getSelectedBtn();\n"
             "const txt = btnm.getBtnText(btn_id);\n"
@@ -304,6 +305,8 @@ void jerryscript_lvgl_demo(void)
         "let chb2 = new CheckBox(screen);\n"
         "chb1.align(LV_ALIGN_TOP_LEFT, 0, 0);\n"
         "chb2.align(LV_ALIGN_BOTTOM_LEFT, 0, 0);\n"
+        "chb1.setStyle('bg_color', 0x00FF00, LV_PART_MAIN);\n"
+        "chb2.setStyle('bg_color', 0xFF0000, LV_PART_MAIN);\n"        
         "chb1.setText('Dynamic Text Example');\n"
         "chb2.setTextStatic('Static Text Example');\n"
         "print(chb1.getText());\n"
@@ -421,6 +424,7 @@ void jerryscript_lvgl_demo(void)
         "let roller = new Roller(screen);\n"
         "roller.align(LV_ALIGN_CENTER, 0, 0);\n"
         "roller.setSize(200, 200);\n"
+        "roller.setStyle('bg_color', 0x00FF00, LV_PART_MAIN);\n"
         "roller.setOptions('Option 1\\nOption 2\\nOption 3\\nOption 4', LV_ROLLER_MODE_NORMAL);\n"
         "roller.setSelected(1, LV_ANIM_ON);\n"
         "roller.setVisibleRowCount(4);\n"
@@ -446,6 +450,7 @@ void jerryscript_lvgl_demo(void)
         "const screen = lv_scr_act();\n"
         "let slider = new Slider(screen);\n"
         "slider.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "slider.setStyle('bg_color', 0x00FF00, LV_PART_MAIN);\n"
         "slider.setSize(200, 20);\n"
         "slider.setRange(0, 100);\n"
         "slider.setValue(50, LV_ANIM_OFF);\n"
@@ -491,7 +496,7 @@ void jerryscript_lvgl_demo(void)
         "});\n";
 #endif
 
-#if 0 /* Test switch */
+#if 0 /* Test table */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
@@ -507,6 +512,7 @@ void jerryscript_lvgl_demo(void)
         "table.setCellValue(1, 0, 'Row 1, Col 1');\n"
         "table.setCellValue(1, 1, 'Row 1, Col 2');\n"
         "table.setCellValue(1, 2, 'Row 1, Col 3');\n"
+        "table.setStyle('bg_color', 0x0000FF, LV_PART_MAIN);\n"
         "table.onClicked(function(e){\n"
             "if (e === LV_EVENT_CLICKED) {\n"
                 "print('Table clicked.');\n"
@@ -526,6 +532,7 @@ void jerryscript_lvgl_demo(void)
         "let textarea = new TextArea(screen);\n"
         "textarea.setSize(200, 100);\n"
         "textarea.align(LV_ALIGN_CENTER, 0, 0);\n"
+        "textarea.setStyle('bg_color', 0x0000FF, LV_PART_MAIN);\n"
         "textarea.setText('Initial Text');\n"
         "textarea.addChar(65);\n"
         "textarea.addChar(66);\n"
@@ -537,7 +544,7 @@ void jerryscript_lvgl_demo(void)
         "print('After delCharForward():', textarea.getText());\n";
 #endif
 
-#if 0 /* Test win */
+#if 1 /* Test win */
     const jerry_char_t script[] =
         "print('LVGL initialization done.');\n"
         "const screen = lv_scr_act();\n"
